@@ -1,0 +1,303 @@
+const ro = {
+  // App
+  "app.name": "Campionatul Comunității Studențești",
+  "app.shortName": "SCC",
+  "app.tagline": "Campionat",
+
+  // Navigation
+  "nav.home": "Acasă",
+  "nav.matches": "Meciuri",
+  "nav.standings": "Clasament",
+  "nav.teams": "Echipe",
+  "nav.players": "Jucători",
+  "nav.stats": "Statistici",
+  "nav.admin": "Admin",
+  "nav.adminPanel": "Panou admin",
+  "nav.logout": "Deconectare",
+
+  // Footer
+  "footer.tagline": "Campionatul studenților, totul într-un singur loc",
+
+  // Common
+  "common.viewAll": "Vezi tot",
+  "common.goalsShort": "goluri",
+  "common.search": "Caută...",
+  "common.all": "Toate",
+  "common.cancel": "Anulează",
+  "common.save": "Salvează",
+  "common.delete": "Șterge",
+  "common.edit": "Editează",
+
+  // Season
+  "season.all": "Toate sezoanele",
+  "season.activeTag": "activ",
+
+  // Match states
+  "matchState.SCHEDULED": "Programat",
+  "matchState.LIVE": "Live",
+  "matchState.FINISHED": "Final",
+  "matchState.POSTPONED": "Amânat",
+
+  // Positions
+  "position.GOALKEEPER": "Portar",
+  "position.DEFENDER": "Fundaș",
+  "position.MIDFIELDER": "Mijlocaș",
+  "position.FORWARD": "Atacant",
+
+  // Home
+  "home.heroTitle1": "Campionatul în care",
+  "home.heroTitleAccent": "studenții",
+  "home.heroTitle2": "fac spectacol",
+  "home.heroSubtitle":
+    "Urmărește meciurile, clasamentul și statisticile echipelor tale preferate — tot ce ține de campionatul studenților, într-un singur loc.",
+  "home.ctaMatches": "Vezi programul",
+  "home.ctaStandings": "Clasament",
+  "home.statTeams": "Echipe",
+  "home.statMatchesPlayed": "Meciuri jucate",
+  "home.statUpcomingHint": "urmează",
+  "home.statGoals": "Goluri marcate",
+  "home.statAvgHint": "pe meci",
+  "home.statTopScorer": "Golgheter",
+  "home.upcoming": "Meciurile următoare",
+  "home.latestResults": "Ultimele rezultate",
+  "home.miniStandings": "Clasament",
+  "home.topScorers": "Golgheteri",
+  "home.noUpcoming": "Niciun meci programat",
+  "home.noUpcomingHint": "Meciurile noi vor apărea aici imediat ce sunt programate.",
+  "home.noResults": "Niciun rezultat încă",
+  "home.noResultsHint": "Rezultatele apar după ce se joacă primele meciuri.",
+  "home.noStandings": "Niciun clasament încă",
+  "home.noScorers": "Niciun gol marcat încă",
+
+  // Standings
+  "standings.title": "Clasament",
+  "standings.subtitle": "Situația echipelor în sezonul curent",
+  "standings.empty": "Niciun clasament încă",
+  "standings.emptyHint":
+    "Clasamentul apare după ce se joacă primele meciuri ale sezonului.",
+  "standings.hdrTeam": "Echipă",
+  "standings.hdrPlayed": "M",
+  "standings.hdrWins": "V",
+  "standings.hdrDraws": "E",
+  "standings.hdrLosses": "Î",
+  "standings.hdrGoalsFor": "GM",
+  "standings.hdrGoalsAgainst": "GP",
+  "standings.hdrPoints": "Pct",
+  "standings.hdrForm": "Formă",
+  "standings.ptsShort": "pct",
+
+  // Matches
+  "matches.title": "Meciuri",
+  "matches.subtitle": "Program și rezultate pe etape",
+  "matches.round": "Etapa",
+  "matches.tabAll": "Toate",
+  "matches.tabUpcoming": "Urmează",
+  "matches.tabResults": "Rezultate",
+  "matches.allTeams": "Toate echipele",
+  "matches.noRound": "Fără etapă",
+  "matches.empty": "Niciun meci găsit",
+  "matches.emptyHint":
+    "Încearcă alt filtru sau revino după ce se programează meciuri noi.",
+
+  // Match details
+  "matchDetails.back": "Înapoi la meciuri",
+  "matchDetails.notFound": "Meciul nu a fost găsit",
+  "matchDetails.notFoundHint": "Meciul căutat nu există sau a fost șters.",
+  "matchDetails.goals": "Goluri",
+  "matchDetails.cards": "Cartonașe",
+  "matchDetails.assist": "Pasă decisivă",
+  "matchDetails.noEvents": "Nu au fost înregistrate evenimente pentru acest meci.",
+
+  // Teams
+  "teams.title": "Echipe",
+  "teams.subtitle": "Toate echipele înscrise în campionat",
+  "teams.playersCount": "{count} jucători",
+  "teams.empty": "Nicio echipă găsită",
+  "teams.emptyHint": "Încearcă alt termen de căutare sau alt sezon.",
+
+  // Team details
+  "teamDetails.back": "Înapoi la echipe",
+  "teamDetails.notFound": "Echipa nu a fost găsită",
+  "teamDetails.position": "Loc",
+  "teamDetails.points": "Puncte",
+  "teamDetails.record": "V-E-Î",
+  "teamDetails.goalDiff": "Golaveraj",
+  "teamDetails.roster": "Lot jucători",
+  "teamDetails.matches": "Meciuri",
+  "teamDetails.noPlayers": "Niciun jucător în lot",
+  "teamDetails.noMatches": "Niciun meci programat",
+
+  // Players
+  "players.title": "Jucători",
+  "players.subtitle": "Statisticile tuturor jucătorilor",
+  "players.allTeams": "Toate echipele",
+  "players.colPlayer": "Jucător",
+  "players.colTeam": "Echipă",
+  "players.colPosition": "Poziție",
+  "players.colGoals": "Goluri",
+  "players.colAssists": "Pase dec.",
+  "players.colYellow": "Galbene",
+  "players.colRed": "Roșii",
+  "players.empty": "Niciun jucător găsit",
+  "players.emptyHint": "Încearcă alt filtru sau alt termen de căutare.",
+
+  // Player details
+  "playerDetails.back": "Înapoi la jucători",
+  "playerDetails.notFound": "Jucătorul nu a fost găsit",
+  "playerDetails.goals": "Goluri",
+  "playerDetails.assists": "Pase decisive",
+  "playerDetails.yellowCards": "Cartonașe galbene",
+  "playerDetails.redCards": "Cartonașe roșii",
+  "playerDetails.timeline": "Istoric evenimente",
+  "playerDetails.noEvents": "Niciun eveniment încă",
+  "playerDetails.noEventsHint":
+    "Golurile, pasele decisive și cartonașele vor apărea aici.",
+  "playerDetails.event.GOAL": "Gol",
+  "playerDetails.event.ASSIST": "Pasă decisivă",
+  "playerDetails.event.YELLOW": "Cartonaș galben",
+  "playerDetails.event.RED": "Cartonaș roșu",
+
+  // Stats
+  "stats.title": "Statistici",
+  "stats.subtitle": "Cifrele campionatului dintr-o privire",
+  "stats.totalGoals": "Goluri marcate",
+  "stats.avgGoals": "Medie goluri/meci",
+  "stats.yellowCards": "Cartonașe galbene",
+  "stats.redCards": "Cartonașe roșii",
+  "stats.chartTopScorers": "Top golgheteri",
+  "stats.chartGoalsPerRound": "Goluri pe etapă",
+  "stats.goalsSeries": "Goluri",
+  "stats.topScorers": "Golgheteri",
+  "stats.topAssists": "Pasatori decisivi",
+  "stats.discipline": "Disciplină",
+  "stats.empty": "Nu există date încă",
+
+  // Not found
+  "notFound.message": "Pagina pe care o cauți nu există sau a fost mutată.",
+  "notFound.backHome": "Înapoi acasă",
+
+  // Admin login
+  "adminLogin.title": "Autentificare admin",
+  "adminLogin.subtitle":
+    "Conectează-te pentru a gestiona sezoane, echipe, jucători și meciuri.",
+  "adminLogin.error": "Email sau parolă incorecte.",
+  "adminLogin.email": "Email",
+  "adminLogin.password": "Parolă",
+  "adminLogin.loading": "Se conectează...",
+  "adminLogin.submit": "Conectare",
+
+  // Admin
+  "admin.title": "Administrare",
+  "admin.subtitle": "Gestionează campionatul: meciuri, echipe, jucători, sezoane",
+  "admin.tabMatches": "Meciuri",
+  "admin.tabTeams": "Echipe",
+  "admin.tabPlayers": "Jucători",
+  "admin.tabSeasons": "Sezoane",
+  "admin.saved": "Salvat cu succes",
+  "admin.saveFailed": "Ceva nu a mers. Încearcă din nou.",
+  "admin.deleted": "Șters cu succes",
+
+  // Admin - seasons
+  "admin.seasons.add": "Sezon nou",
+  "admin.seasons.addTitle": "Adaugă sezon",
+  "admin.seasons.editTitle": "Editează sezonul",
+  "admin.seasons.name": "Numele sezonului",
+  "admin.seasons.startDate": "Data de început",
+  "admin.seasons.endDate": "Data de final",
+  "admin.seasons.description": "Descriere",
+  "admin.seasons.isActive": "Sezon activ",
+  "admin.seasons.empty": "Niciun sezon încă",
+  "admin.seasons.emptyHint": "Creează primul sezon ca să începi.",
+  "admin.seasons.colName": "Nume",
+  "admin.seasons.colPeriod": "Perioadă",
+  "admin.seasons.colTeams": "Echipe",
+  "admin.seasons.colMatches": "Meciuri",
+  "admin.seasons.colStatus": "Status",
+  "admin.seasons.active": "Activ",
+  "admin.seasons.manageTeams": "Gestionează echipele",
+  "admin.seasons.teamsTitle": "Echipe înscrise",
+  "admin.seasons.deleteTitle": "Ștergi sezonul?",
+  "admin.seasons.deleteDescription":
+    "Toate meciurile, clasamentul și înscrierile acestui sezon vor fi șterse definitiv.",
+
+  // Admin - teams
+  "admin.teams.add": "Echipă nouă",
+  "admin.teams.addTitle": "Adaugă echipă",
+  "admin.teams.editTitle": "Editează echipa",
+  "admin.teams.uploadLogo": "Încarcă logo",
+  "admin.teams.name": "Numele echipei",
+  "admin.teams.shortName": "Nume scurt",
+  "admin.teams.faculty": "Facultate",
+  "admin.teams.color": "Culoarea echipei",
+  "admin.teams.description": "Descriere",
+  "admin.teams.empty": "Nicio echipă încă",
+  "admin.teams.emptyHint": "Adaugă prima echipă a campionatului.",
+  "admin.teams.colTeam": "Echipă",
+  "admin.teams.colShortName": "Scurt",
+  "admin.teams.colFaculty": "Facultate",
+  "admin.teams.colPlayers": "Jucători",
+  "admin.teams.deleteTitle": "Ștergi echipa?",
+  "admin.teams.deleteDescription":
+    "Echipa poate fi ștearsă doar dacă nu are meciuri. Jucătorii ei vor rămâne fără echipă.",
+
+  // Admin - players
+  "admin.players.add": "Jucător nou",
+  "admin.players.addTitle": "Adaugă jucător",
+  "admin.players.editTitle": "Editează jucătorul",
+  "admin.players.uploadAvatar": "Încarcă poză",
+  "admin.players.name": "Nume complet",
+  "admin.players.team": "Echipă",
+  "admin.players.noTeam": "Fără echipă",
+  "admin.players.position": "Poziție",
+  "admin.players.shirtNumber": "Număr tricou",
+  "admin.players.allTeams": "Toate echipele",
+  "admin.players.empty": "Niciun jucător găsit",
+  "admin.players.emptyHint": "Adaugă jucători și repartizează-i pe echipe.",
+  "admin.players.colName": "Jucător",
+  "admin.players.colTeam": "Echipă",
+  "admin.players.colPosition": "Poziție",
+  "admin.players.colGoals": "Goluri",
+  "admin.players.deleteTitle": "Ștergi jucătorul?",
+  "admin.players.deleteDescription":
+    "Golurile deja înregistrate vor păstra numele jucătorului.",
+
+  // Admin - matches
+  "admin.matches.add": "Meci nou",
+  "admin.matches.addTitle": "Programează meci",
+  "admin.matches.editTitle": "Editează meciul",
+  "admin.matches.season": "Sezon",
+  "admin.matches.homeTeam": "Echipa gazdă",
+  "admin.matches.awayTeam": "Echipa oaspete",
+  "admin.matches.round": "Etapa",
+  "admin.matches.dateTime": "Data și ora",
+  "admin.matches.location": "Locație",
+  "admin.matches.state": "Status",
+  "admin.matches.empty": "Niciun meci în acest sezon",
+  "admin.matches.emptyHint": "Programează primul meci al sezonului.",
+  "admin.matches.colDate": "Data",
+  "admin.matches.colRound": "Etapa",
+  "admin.matches.colMatch": "Meci",
+  "admin.matches.colScore": "Scor",
+  "admin.matches.colState": "Status",
+  "admin.matches.setResult": "Introdu rezultatul",
+  "admin.matches.resultTitle": "Rezultatul meciului",
+  "admin.matches.resultSaved": "Rezultat salvat și clasament actualizat",
+  "admin.matches.goalsSection": "Goluri",
+  "admin.matches.addGoal": "Adaugă gol",
+  "admin.matches.noGoalRows":
+    "Adaugă golurile meciului (marcator, pasă decisivă, minut).",
+  "admin.matches.scorer": "Marcator",
+  "admin.matches.noAssist": "Fără pasă decisivă",
+  "admin.matches.player": "Jucător",
+  "admin.matches.minute": "Min",
+  "admin.matches.cardsSection": "Cartonașe",
+  "admin.matches.addCard": "Adaugă cartonaș",
+  "admin.matches.yellowCard": "Galben",
+  "admin.matches.redCard": "Roșu",
+  "admin.matches.saveResult": "Salvează rezultatul",
+  "admin.matches.deleteTitle": "Ștergi meciul?",
+  "admin.matches.deleteDescription":
+    "Golurile și cartonașele meciului vor fi șterse, iar clasamentul recalculat.",
+};
+
+export default ro;

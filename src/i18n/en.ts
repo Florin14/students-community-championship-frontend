@@ -1,0 +1,303 @@
+const en = {
+  // App
+  "app.name": "Students Community Championship",
+  "app.shortName": "SCC",
+  "app.tagline": "Championship",
+
+  // Navigation
+  "nav.home": "Home",
+  "nav.matches": "Matches",
+  "nav.standings": "Standings",
+  "nav.teams": "Teams",
+  "nav.players": "Players",
+  "nav.stats": "Statistics",
+  "nav.admin": "Admin",
+  "nav.adminPanel": "Admin panel",
+  "nav.logout": "Log out",
+
+  // Footer
+  "footer.tagline": "The students' championship, all in one place",
+
+  // Common
+  "common.viewAll": "View all",
+  "common.goalsShort": "goals",
+  "common.search": "Search...",
+  "common.all": "All",
+  "common.cancel": "Cancel",
+  "common.save": "Save",
+  "common.delete": "Delete",
+  "common.edit": "Edit",
+
+  // Season
+  "season.all": "All seasons",
+  "season.activeTag": "active",
+
+  // Match states
+  "matchState.SCHEDULED": "Scheduled",
+  "matchState.LIVE": "Live",
+  "matchState.FINISHED": "Finished",
+  "matchState.POSTPONED": "Postponed",
+
+  // Positions
+  "position.GOALKEEPER": "Goalkeeper",
+  "position.DEFENDER": "Defender",
+  "position.MIDFIELDER": "Midfielder",
+  "position.FORWARD": "Forward",
+
+  // Home
+  "home.heroTitle1": "The championship where",
+  "home.heroTitleAccent": "students",
+  "home.heroTitle2": "make the show",
+  "home.heroSubtitle":
+    "Follow the matches, standings and stats of your favorite teams — everything about the students' championship, in one place.",
+  "home.ctaMatches": "See the fixtures",
+  "home.ctaStandings": "Standings",
+  "home.statTeams": "Teams",
+  "home.statMatchesPlayed": "Matches played",
+  "home.statUpcomingHint": "upcoming",
+  "home.statGoals": "Goals scored",
+  "home.statAvgHint": "per match",
+  "home.statTopScorer": "Top scorer",
+  "home.upcoming": "Upcoming matches",
+  "home.latestResults": "Latest results",
+  "home.miniStandings": "Standings",
+  "home.topScorers": "Top scorers",
+  "home.noUpcoming": "No upcoming matches",
+  "home.noUpcomingHint": "New fixtures will show up here once scheduled.",
+  "home.noResults": "No results yet",
+  "home.noResultsHint": "Results will appear after the first matches are played.",
+  "home.noStandings": "No standings yet",
+  "home.noScorers": "No goals scored yet",
+
+  // Standings
+  "standings.title": "Standings",
+  "standings.subtitle": "How the teams rank this season",
+  "standings.empty": "No standings yet",
+  "standings.emptyHint":
+    "The table will appear once the first matches of the season are played.",
+  "standings.hdrTeam": "Team",
+  "standings.hdrPlayed": "P",
+  "standings.hdrWins": "W",
+  "standings.hdrDraws": "D",
+  "standings.hdrLosses": "L",
+  "standings.hdrGoalsFor": "GF",
+  "standings.hdrGoalsAgainst": "GA",
+  "standings.hdrPoints": "Pts",
+  "standings.hdrForm": "Form",
+  "standings.ptsShort": "pts",
+
+  // Matches
+  "matches.title": "Matches",
+  "matches.subtitle": "Fixtures and results by round",
+  "matches.round": "Round",
+  "matches.tabAll": "All",
+  "matches.tabUpcoming": "Upcoming",
+  "matches.tabResults": "Results",
+  "matches.allTeams": "All teams",
+  "matches.noRound": "No round",
+  "matches.empty": "No matches found",
+  "matches.emptyHint":
+    "Try another filter or check back once new matches are scheduled.",
+
+  // Match details
+  "matchDetails.back": "Back to matches",
+  "matchDetails.notFound": "Match not found",
+  "matchDetails.notFoundHint":
+    "The match you are looking for does not exist or was removed.",
+  "matchDetails.goals": "Goals",
+  "matchDetails.cards": "Cards",
+  "matchDetails.assist": "Assist",
+  "matchDetails.noEvents": "No events were recorded for this match.",
+
+  // Teams
+  "teams.title": "Teams",
+  "teams.subtitle": "All teams enrolled in the championship",
+  "teams.playersCount": "{count} players",
+  "teams.empty": "No teams found",
+  "teams.emptyHint": "Try a different search term or another season.",
+
+  // Team details
+  "teamDetails.back": "Back to teams",
+  "teamDetails.notFound": "Team not found",
+  "teamDetails.position": "Rank",
+  "teamDetails.points": "Points",
+  "teamDetails.record": "W-D-L",
+  "teamDetails.goalDiff": "Goal diff",
+  "teamDetails.roster": "Squad",
+  "teamDetails.matches": "Matches",
+  "teamDetails.noPlayers": "No players in the squad",
+  "teamDetails.noMatches": "No matches yet",
+
+  // Players
+  "players.title": "Players",
+  "players.subtitle": "Stats for every player",
+  "players.allTeams": "All teams",
+  "players.colPlayer": "Player",
+  "players.colTeam": "Team",
+  "players.colPosition": "Position",
+  "players.colGoals": "Goals",
+  "players.colAssists": "Assists",
+  "players.colYellow": "Yellow",
+  "players.colRed": "Red",
+  "players.empty": "No players found",
+  "players.emptyHint": "Try a different filter or search term.",
+
+  // Player details
+  "playerDetails.back": "Back to players",
+  "playerDetails.notFound": "Player not found",
+  "playerDetails.goals": "Goals",
+  "playerDetails.assists": "Assists",
+  "playerDetails.yellowCards": "Yellow cards",
+  "playerDetails.redCards": "Red cards",
+  "playerDetails.timeline": "Event history",
+  "playerDetails.noEvents": "No events yet",
+  "playerDetails.noEventsHint": "Goals, assists and cards will show up here.",
+  "playerDetails.event.GOAL": "Goal",
+  "playerDetails.event.ASSIST": "Assist",
+  "playerDetails.event.YELLOW": "Yellow card",
+  "playerDetails.event.RED": "Red card",
+
+  // Stats
+  "stats.title": "Statistics",
+  "stats.subtitle": "Championship numbers at a glance",
+  "stats.totalGoals": "Goals scored",
+  "stats.avgGoals": "Avg goals/match",
+  "stats.yellowCards": "Yellow cards",
+  "stats.redCards": "Red cards",
+  "stats.chartTopScorers": "Top scorers",
+  "stats.chartGoalsPerRound": "Goals per round",
+  "stats.goalsSeries": "Goals",
+  "stats.topScorers": "Top scorers",
+  "stats.topAssists": "Top assists",
+  "stats.discipline": "Discipline",
+  "stats.empty": "No data yet",
+
+  // Not found
+  "notFound.message":
+    "The page you are looking for does not exist or has been moved.",
+  "notFound.backHome": "Back to home",
+
+  // Admin login
+  "adminLogin.title": "Admin sign in",
+  "adminLogin.subtitle":
+    "Sign in to manage seasons, teams, players and matches.",
+  "adminLogin.error": "Incorrect email or password.",
+  "adminLogin.email": "Email",
+  "adminLogin.password": "Password",
+  "adminLogin.loading": "Signing in...",
+  "adminLogin.submit": "Sign in",
+
+  // Admin
+  "admin.title": "Administration",
+  "admin.subtitle": "Manage the championship: matches, teams, players, seasons",
+  "admin.tabMatches": "Matches",
+  "admin.tabTeams": "Teams",
+  "admin.tabPlayers": "Players",
+  "admin.tabSeasons": "Seasons",
+  "admin.saved": "Saved successfully",
+  "admin.saveFailed": "Something went wrong. Please try again.",
+  "admin.deleted": "Deleted successfully",
+
+  // Admin - seasons
+  "admin.seasons.add": "New season",
+  "admin.seasons.addTitle": "Add season",
+  "admin.seasons.editTitle": "Edit season",
+  "admin.seasons.name": "Season name",
+  "admin.seasons.startDate": "Start date",
+  "admin.seasons.endDate": "End date",
+  "admin.seasons.description": "Description",
+  "admin.seasons.isActive": "Active season",
+  "admin.seasons.empty": "No seasons yet",
+  "admin.seasons.emptyHint": "Create the first season to get started.",
+  "admin.seasons.colName": "Name",
+  "admin.seasons.colPeriod": "Period",
+  "admin.seasons.colTeams": "Teams",
+  "admin.seasons.colMatches": "Matches",
+  "admin.seasons.colStatus": "Status",
+  "admin.seasons.active": "Active",
+  "admin.seasons.manageTeams": "Manage teams",
+  "admin.seasons.teamsTitle": "Enrolled teams",
+  "admin.seasons.deleteTitle": "Delete season?",
+  "admin.seasons.deleteDescription":
+    "All matches, standings and enrollments of this season will be permanently deleted.",
+
+  // Admin - teams
+  "admin.teams.add": "New team",
+  "admin.teams.addTitle": "Add team",
+  "admin.teams.editTitle": "Edit team",
+  "admin.teams.uploadLogo": "Upload logo",
+  "admin.teams.name": "Team name",
+  "admin.teams.shortName": "Short name",
+  "admin.teams.faculty": "Faculty",
+  "admin.teams.color": "Team color",
+  "admin.teams.description": "Description",
+  "admin.teams.empty": "No teams yet",
+  "admin.teams.emptyHint": "Add the first team of the championship.",
+  "admin.teams.colTeam": "Team",
+  "admin.teams.colShortName": "Short",
+  "admin.teams.colFaculty": "Faculty",
+  "admin.teams.colPlayers": "Players",
+  "admin.teams.deleteTitle": "Delete team?",
+  "admin.teams.deleteDescription":
+    "The team can only be deleted if it has no matches. Its players will remain without a team.",
+
+  // Admin - players
+  "admin.players.add": "New player",
+  "admin.players.addTitle": "Add player",
+  "admin.players.editTitle": "Edit player",
+  "admin.players.uploadAvatar": "Upload photo",
+  "admin.players.name": "Full name",
+  "admin.players.team": "Team",
+  "admin.players.noTeam": "No team",
+  "admin.players.position": "Position",
+  "admin.players.shirtNumber": "Shirt number",
+  "admin.players.allTeams": "All teams",
+  "admin.players.empty": "No players found",
+  "admin.players.emptyHint": "Add players and assign them to teams.",
+  "admin.players.colName": "Player",
+  "admin.players.colTeam": "Team",
+  "admin.players.colPosition": "Position",
+  "admin.players.colGoals": "Goals",
+  "admin.players.deleteTitle": "Delete player?",
+  "admin.players.deleteDescription":
+    "Goals already recorded will keep the player's name.",
+
+  // Admin - matches
+  "admin.matches.add": "New match",
+  "admin.matches.addTitle": "Schedule match",
+  "admin.matches.editTitle": "Edit match",
+  "admin.matches.season": "Season",
+  "admin.matches.homeTeam": "Home team",
+  "admin.matches.awayTeam": "Away team",
+  "admin.matches.round": "Round",
+  "admin.matches.dateTime": "Date and time",
+  "admin.matches.location": "Location",
+  "admin.matches.state": "Status",
+  "admin.matches.empty": "No matches in this season",
+  "admin.matches.emptyHint": "Schedule the first match of the season.",
+  "admin.matches.colDate": "Date",
+  "admin.matches.colRound": "Round",
+  "admin.matches.colMatch": "Match",
+  "admin.matches.colScore": "Score",
+  "admin.matches.colState": "Status",
+  "admin.matches.setResult": "Enter result",
+  "admin.matches.resultTitle": "Match result",
+  "admin.matches.resultSaved": "Result saved and standings updated",
+  "admin.matches.goalsSection": "Goals",
+  "admin.matches.addGoal": "Add goal",
+  "admin.matches.noGoalRows": "Add the goals of the match (scorer, assist, minute).",
+  "admin.matches.scorer": "Scorer",
+  "admin.matches.noAssist": "No assist",
+  "admin.matches.player": "Player",
+  "admin.matches.minute": "Min",
+  "admin.matches.cardsSection": "Cards",
+  "admin.matches.addCard": "Add card",
+  "admin.matches.yellowCard": "Yellow",
+  "admin.matches.redCard": "Red",
+  "admin.matches.saveResult": "Save result",
+  "admin.matches.deleteTitle": "Delete match?",
+  "admin.matches.deleteDescription":
+    "Goals and cards of this match will be deleted and the standings recalculated.",
+};
+
+export default en;

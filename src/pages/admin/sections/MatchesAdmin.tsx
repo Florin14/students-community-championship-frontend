@@ -1,0 +1,210 @@
+import { Button } from "@mui/material";
+import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+
+import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
+import EmptyState from "../../../components/reusable/EmptyState";
+import MatchStateChip from "../../../components/reusable/MatchStateChip";
+import SeasonSelector from "../../../components/reusable/SeasonSelector";
+import { t } from "../../../i18n";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks";
+import { showSnackbar } from "../../../store/slices/snackbarSlice";
+import {
+  deleteMatchThunk,
+  fetchMatches,
+} from "../../../store/slices/thunks/matchesThunks";
+import { fetchPlayers } from "../../../store/slices/thunks/playersThunks";
+import { fetchTeams } from "../../../store/slices/thunks/teamsThunks";
+import type { Match } from "../../../types";
+import { formatDateTimeDot, parseApiDate } from "../../../utils/dateFormat";
+import {
+  AdminCard,
+  AdminTable,
+  IconAction,
+  RowActions,
+  TableWrap,
+  Toolbar,
+  ToolbarGroup,
+} from "../adminUi";
+import MatchModal from "../modals/MatchModal";
+import ResultModal from "../modals/ResultModal";
+
+const MatchesAdmin = () => {
+  const dispatch = useAppDispatch();
+  const language = useAppSelector((state) => state.i18n.language);
+  const { selectedSeasonId, activeSeason } = useAppSelector(
+    (state) => state.seasons
+  );
+  const { matches } = useAppSelector((state) => state.matches);
+
+  const seasonId = selectedSeasonId ?? activeSeason?.id ?? null;
+
+  const [matchModalOpen, setMatchModalOpen] = useState(false);
+  const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [editingMatch, setEditingMatch] = useState<Match | null>(null);
+  const [deletingMatch, setDeletingMatch] = useState<Match | null>(null);
+
+  useEffect(() => {
+    dispatch(fetchMatches(seasonId ? { seasonId } : undefined));
+    dispatch(fetchTeams());
+    dispatch(fetchPlayers());
+  }, [dispatch, seasonId]);
+
+  const sorted = useMemo(
+    () =>
+      [...matches].sort(
+        (a, b) =>
+          parseApiDate(b.timestamp).getTime() -
+          parseApiDate(a.timestamp).getTime()
+      ),
+    [matches]
+  );
+
+  const handleDelete = async () => {
+    if (!deletingMatch) return;
+    const action = await dispatch(deleteMatchThunk({ id: deletingMatch.id }));
+    setDeletingMatch(null);
+    if (deleteMatchThunk.fulfilled.match(action)) {
+      dispatch(
+        showSnackbar({
+          message: t(language, "admin.deleted"),
+          severity: "success",
+        })
+      );
+    } else {
+      dispatch(
+        showSnackbar({
+          message: String(action.payload ?? t(language, "admin.saveFailed")),
+          severity: "error",
+        })
+      );
+    }
+  };
+
+  return (
+    <AdminCard>
+      <Toolbar>
+        <ToolbarGroup>
+          <SeasonSelector />
+        </ToolbarGroup>
+        <Button
+          variant="contained"
+          startIcon={<Plus size={16} />}
+          onClick={() => {
+            setEditingMatch(null);
+            setMatchModalOpen(true);
+          }}
+        >
+          {t(language, "admin.matches.add")}
+        </Button>
+      </Toolbar>
+
+      {sorted.length === 0 ? (
+        <EmptyState
+          icon={ClipboardList}
+          title={t(language, "admin.matches.empty")}
+          subtitle={t(language, "admin.matches.emptyHint")}
+        />
+      ) : (
+        <TableWrap>
+          <AdminTable>
+            <thead>
+              <tr>
+                <th>{t(language, "admin.matches.colDate")}</th>
+                <th>{t(language, "admin.matches.colRound")}</th>
+                <th>{t(language, "admin.matches.colMatch")}</th>
+                <th>{t(language, "admin.matches.colScore")}</th>
+                <th>{t(language, "admin.matches.colState")}</th>
+                <th />
+              </tr>
+            </thead>
+            <tbody>
+              {sorted.map((match) => (
+                <tr key={match.id}>
+                  <td style={{ whiteSpace: "nowrap" }}>
+                    {formatDateTimeDot(parseApiDate(match.timestamp))}
+                  </td>
+                  <td>{match.round ?? "—"}</td>
+                  <td>
+                    <strong>{match.homeTeamName}</strong>
+                    <span style={{ color: "var(--text-disabled)" }}>
+                      {" "}
+                      vs{" "}
+                    </span>
+                    <strong>{match.awayTeamName}</strong>
+                  </td>
+                  <td style={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+                    {match.scoreHome !== null &&
+                    match.scoreHome !== undefined &&
+                    match.scoreAway !== null &&
+                    match.scoreAway !== undefined
+                      ? `${match.scoreHome} : ${match.scoreAway}`
+                      : "—"}
+                  </td>
+                  <td>
+                    <MatchStateChip state={match.state} language={language} />
+                  </td>
+                  <td>
+                    <RowActions>
+                      <IconAction
+                        $tone="accent"
+                        title={t(language, "admin.matches.setResult")}
+                        onClick={() => {
+                          setEditingMatch(match);
+                          setResultModalOpen(true);
+                        }}
+                      >
+                        <ClipboardList size={15} />
+                      </IconAction>
+                      <IconAction
+                        title={t(language, "common.edit")}
+                        onClick={() => {
+                          setEditingMatch(match);
+                          setMatchModalOpen(true);
+                        }}
+                      >
+                        <Pencil size={15} />
+                      </IconAction>
+                      <IconAction
+                        $tone="danger"
+                        title={t(language, "common.delete")}
+                        onClick={() => setDeletingMatch(match)}
+                      >
+                        <Trash2 size={15} />
+                      </IconAction>
+                    </RowActions>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </AdminTable>
+        </TableWrap>
+      )}
+
+      <MatchModal
+        open={matchModalOpen}
+        match={editingMatch}
+        seasonId={seasonId}
+        onClose={() => setMatchModalOpen(false)}
+      />
+      <ResultModal
+        open={resultModalOpen}
+        match={editingMatch}
+        seasonId={seasonId}
+        onClose={() => setResultModalOpen(false)}
+      />
+      <ConfirmDialog
+        open={Boolean(deletingMatch)}
+        title={t(language, "admin.matches.deleteTitle")}
+        description={t(language, "admin.matches.deleteDescription")}
+        confirmLabel={t(language, "common.delete")}
+        cancelLabel={t(language, "common.cancel")}
+        destructive
+        onConfirm={handleDelete}
+        onClose={() => setDeletingMatch(null)}
+      />
+    </AdminCard>
+  );
+};
+
+export default MatchesAdmin;

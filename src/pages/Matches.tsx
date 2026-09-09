@@ -1,0 +1,238 @@
+import { MenuItem } from "@mui/material";
+import { motion } from "framer-motion";
+import { CalendarDays } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import styled from "styled-components";
+
+import EmptyState from "../components/reusable/EmptyState";
+import LoadingState from "../components/reusable/LoadingState";
+import MatchCard from "../components/reusable/MatchCard";
+import SeasonSelector from "../components/reusable/SeasonSelector";
+import SectionHeading from "../components/reusable/SectionHeading";
+import StyledSelect from "../components/reusable/StyledSelect";
+import { t } from "../i18n";
+import { useAppDispatch, useAppSelector } from "../store/hooks";
+import { fetchMatches } from "../store/slices/thunks/matchesThunks";
+import { fetchTeams } from "../store/slices/thunks/teamsThunks";
+import type { Match } from "../types";
+
+type Tab = "all" | "upcoming" | "results";
+
+const FilterBar = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+`;
+
+const Tabs = styled.div`
+  display: flex;
+  gap: 4px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+`;
+
+const TabPill = styled.button<{ $active: boolean }>`
+  border: none;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-family: "Sora", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: ${({ $active }) =>
+    $active ? "var(--accent)" : "transparent"};
+  color: ${({ $active }) =>
+    $active ? "var(--accent-contrast)" : "var(--text-secondary)"};
+  transition: all 0.15s ease;
+
+  &:hover {
+    color: ${({ $active }) =>
+      $active ? "var(--accent-contrast)" : "var(--text-primary)"};
+  }
+`;
+
+const RoundGroup = styled(motion.section)`
+  margin-bottom: 30px;
+`;
+
+const RoundHeader = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+
+  h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+`;
+
+const RoundCount = styled.span`
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: "Sora", sans-serif;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--violet-soft);
+  color: var(--violet);
+`;
+
+const Grid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 14px;
+
+  @media (max-width: 420px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+interface RoundBucket {
+  round: number | null;
+  matches: Match[];
+}
+
+const Matches = () => {
+  const dispatch = useAppDispatch();
+  const language = useAppSelector((state) => state.i18n.language);
+  const { selectedSeasonId, activeSeason } = useAppSelector(
+    (state) => state.seasons
+  );
+  const { matches, loading } = useAppSelector((state) => state.matches);
+  const { teams } = useAppSelector((state) => state.teams);
+
+  const [tab, setTab] = useState<Tab>("all");
+  const [teamFilter, setTeamFilter] = useState<number | "">("");
+
+  const seasonId = selectedSeasonId ?? activeSeason?.id;
+
+  useEffect(() => {
+    const params = seasonId ? { seasonId } : undefined;
+    dispatch(fetchMatches(params));
+    dispatch(fetchTeams(params));
+    setTeamFilter("");
+  }, [dispatch, seasonId]);
+
+  const buckets = useMemo<RoundBucket[]>(() => {
+    const filtered = matches.filter((match) => {
+      if (tab === "upcoming" && match.state === "FINISHED") return false;
+      if (tab === "results" && match.state !== "FINISHED") return false;
+      if (
+        teamFilter !== "" &&
+        match.homeTeamId !== teamFilter &&
+        match.awayTeamId !== teamFilter
+      ) {
+        return false;
+      }
+      return true;
+    });
+
+    const byRound = new Map<number | null, Match[]>();
+    filtered.forEach((match) => {
+      const key = match.round ?? null;
+      const bucket = byRound.get(key) ?? [];
+      bucket.push(match);
+      byRound.set(key, bucket);
+    });
+
+    const rounds = [...byRound.keys()].sort((a, b) => {
+      if (a === null) return 1;
+      if (b === null) return -1;
+      return b - a;
+    });
+
+    return rounds.map((round) => ({
+      round,
+      matches: byRound.get(round) ?? [],
+    }));
+  }, [matches, tab, teamFilter]);
+
+  const tabs: { key: Tab; label: string }[] = [
+    { key: "all", label: t(language, "matches.tabAll") },
+    { key: "upcoming", label: t(language, "matches.tabUpcoming") },
+    { key: "results", label: t(language, "matches.tabResults") },
+  ];
+
+  return (
+    <>
+      <SectionHeading
+        title={t(language, "matches.title")}
+        subtitle={t(language, "matches.subtitle")}
+        action={<SeasonSelector />}
+      />
+
+      <FilterBar>
+        <Tabs>
+          {tabs.map(({ key, label }) => (
+            <TabPill
+              key={key}
+              $active={tab === key}
+              onClick={() => setTab(key)}
+            >
+              {label}
+            </TabPill>
+          ))}
+        </Tabs>
+        <StyledSelect
+          size="small"
+          value={teamFilter}
+          onChange={(event) =>
+            setTeamFilter(
+              event.target.value === "" ? "" : Number(event.target.value)
+            )
+          }
+          displayEmpty
+          sx={{ minWidth: 210 }}
+        >
+          <MenuItem value="">{t(language, "matches.allTeams")}</MenuItem>
+          {teams.map((team) => (
+            <MenuItem key={team.id} value={team.id}>
+              {team.name}
+            </MenuItem>
+          ))}
+        </StyledSelect>
+      </FilterBar>
+
+      {loading ? (
+        <LoadingState />
+      ) : buckets.length === 0 ? (
+        <EmptyState
+          icon={CalendarDays}
+          title={t(language, "matches.empty")}
+          subtitle={t(language, "matches.emptyHint")}
+        />
+      ) : (
+        buckets.map(({ round, matches: roundMatches }) => (
+          <RoundGroup
+            key={round ?? "none"}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25, ease: "easeOut" }}
+          >
+            <RoundHeader>
+              <h3>
+                {round !== null
+                  ? `${t(language, "matches.round")} ${round}`
+                  : t(language, "matches.noRound")}
+              </h3>
+              <RoundCount>{roundMatches.length}</RoundCount>
+            </RoundHeader>
+            <Grid>
+              {roundMatches.map((match) => (
+                <MatchCard key={match.id} match={match} language={language} />
+              ))}
+            </Grid>
+          </RoundGroup>
+        ))
+      )}
+    </>
+  );
+};
+
+export default Matches;
