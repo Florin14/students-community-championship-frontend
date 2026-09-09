@@ -24,6 +24,8 @@ import type { Match, MatchState } from "../../../types";
 import { parseApiDate, toInputDateTimeLocal } from "../../../utils/dateFormat";
 import { FieldGrid, FullRow } from "../adminUi";
 
+// A finished match is only ever moved by the console (finish / reopen), so the
+// scheduling form never offers FINISHED or HALF_TIME.
 const EDIT_STATES: MatchState[] = ["SCHEDULED", "LIVE", "POSTPONED"];
 
 interface MatchModalProps {
@@ -38,12 +40,14 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
   const language = useAppSelector((state) => state.i18n.language);
   const { seasons } = useAppSelector((state) => state.seasons);
   const { teams } = useAppSelector((state) => state.teams);
+  const { fields } = useAppSelector((state) => state.fields);
 
   const [formSeasonId, setFormSeasonId] = useState<number | "">("");
   const [homeTeamId, setHomeTeamId] = useState<number | "">("");
   const [awayTeamId, setAwayTeamId] = useState<number | "">("");
   const [round, setRound] = useState("");
   const [timestamp, setTimestamp] = useState("");
+  const [fieldId, setFieldId] = useState<number | "">("");
   const [location, setLocation] = useState("");
   const [state, setState] = useState<MatchState>("SCHEDULED");
   const [saving, setSaving] = useState(false);
@@ -57,6 +61,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
       setTimestamp(
         match ? toInputDateTimeLocal(parseApiDate(match.timestamp)) : ""
       );
+      setFieldId(match?.fieldId ?? "");
       setLocation(match?.location ?? "");
       setState(match?.state === "FINISHED" ? "SCHEDULED" : match?.state ?? "SCHEDULED");
     }
@@ -70,6 +75,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
     const common = {
       round: round === "" ? null : Number(round),
       timestamp,
+      fieldId: fieldId === "" ? null : fieldId,
       location: location || null,
     };
 
@@ -219,14 +225,37 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
-            <FullRow>
-              <StyledTextField
-                label={t(language, "admin.matches.location")}
-                value={location}
-                onChange={(event) => setLocation(event.target.value)}
-                fullWidth
-              />
-            </FullRow>
+            <FormControl fullWidth>
+              <InputLabel sx={{ color: "var(--text-secondary)" }}>
+                {t(language, "admin.matches.field")}
+              </InputLabel>
+              <StyledSelect
+                label={t(language, "admin.matches.field")}
+                value={fieldId}
+                onChange={(event) =>
+                  setFieldId(
+                    event.target.value === ""
+                      ? ""
+                      : Number(event.target.value)
+                  )
+                }
+              >
+                <MenuItem value="">
+                  {t(language, "admin.matches.noField")}
+                </MenuItem>
+                {fields.map((field) => (
+                  <MenuItem key={field.id} value={field.id}>
+                    {field.name}
+                  </MenuItem>
+                ))}
+              </StyledSelect>
+            </FormControl>
+            <StyledTextField
+              label={t(language, "admin.matches.location")}
+              value={location}
+              onChange={(event) => setLocation(event.target.value)}
+              fullWidth
+            />
             {match && match.state !== "FINISHED" && (
               <FullRow>
                 <FormControl fullWidth>

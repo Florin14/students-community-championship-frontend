@@ -14,6 +14,7 @@ import { useEffect, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
+import LiveStrip from "../components/reusable/LiveStrip";
 import MatchCard from "../components/reusable/MatchCard";
 import EmptyState from "../components/reusable/EmptyState";
 import SectionHeading from "../components/reusable/SectionHeading";
@@ -286,6 +287,8 @@ const Home = () => {
           </Button>
         </HeroActions>
       </Hero>
+
+      <LiveStrip />
 
       <StatsGrid>
         <StatCard

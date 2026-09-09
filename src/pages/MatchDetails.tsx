@@ -2,15 +2,17 @@ import { motion } from "framer-motion";
 import {
   ArrowLeft,
   CalendarDays,
-  Goal as GoalIcon,
+  Flag,
   MapPin,
   SearchX,
+  ShieldCheck,
 } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
+import MatchTimeline from "../components/reusable/MatchTimeline";
 import LoadingState from "../components/reusable/LoadingState";
 import MatchStateChip from "../components/reusable/MatchStateChip";
 import SectionHeading from "../components/reusable/SectionHeading";
@@ -19,6 +21,7 @@ import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { clearSelectedMatch } from "../store/slices/matchesSlice";
 import { fetchMatchById } from "../store/slices/thunks/matchesThunks";
+import { usePolling } from "../hooks/usePolling";
 import { formatDateTimeDot, parseApiDate } from "../utils/dateFormat";
 
 const BackLink = styled(Link)`
@@ -161,107 +164,14 @@ const HeroMeta = styled.div`
   }
 `;
 
-const EventsCard = styled.div`
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  padding: 20px;
-  box-shadow: var(--shadow-card);
-  margin-bottom: 24px;
-`;
-
-const GoalsGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 10px 26px;
-
-  @media (max-width: 560px) {
-    gap: 10px 12px;
-  }
-`;
-
-const GoalRow = styled.div<{ $side: "home" | "away" }>`
-  grid-column: ${({ $side }) => ($side === "home" ? 1 : 2)};
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  flex-direction: ${({ $side }) =>
-    $side === "away" ? "row-reverse" : "row"};
-  text-align: ${({ $side }) => ($side === "away" ? "right" : "left")};
-  padding: 8px 10px;
-  border-radius: 12px;
-  background: var(--bg-surface);
-`;
-
-const MinuteChip = styled.span`
-  font-family: "Sora", sans-serif;
-  font-size: 0.72rem;
-  font-weight: 800;
-  min-width: 34px;
-  text-align: center;
-  padding: 3px 6px;
-  border-radius: 8px;
-  background: var(--accent-soft);
-  color: var(--accent);
-  flex-shrink: 0;
-`;
-
-const GoalInfo = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  min-width: 0;
-
-  strong {
-    font-size: 0.86rem;
-    color: var(--text-primary);
-  }
-
-  small {
-    font-size: 0.74rem;
-    color: var(--text-secondary);
-  }
-`;
-
-const CardRow = styled.div`
+const ConfirmedNote = styled.p`
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
-  border-radius: 12px;
-
-  &:hover {
-    background: var(--bg-surface);
-  }
-`;
-
-const CardRect = styled.span<{ $red: boolean }>`
-  width: 12px;
-  height: 17px;
-  border-radius: 3px;
-  background: ${({ $red }) => ($red ? "var(--danger)" : "#FBBF24")};
-  flex-shrink: 0;
-`;
-
-const CardName = styled.span`
-  flex: 1;
-  font-size: 0.86rem;
-  font-weight: 600;
-  color: var(--text-primary);
-`;
-
-const CardMinute = styled.span`
-  font-family: "Sora", sans-serif;
-  font-size: 0.78rem;
-  font-weight: 700;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 20px;
   color: var(--text-secondary);
-`;
-
-const NoEvents = styled.p`
-  text-align: center;
-  font-size: 0.85rem;
-  color: var(--text-disabled);
-  padding: 20px 0 8px;
+  font-size: 0.82rem;
 `;
 
 const MatchDetails = () => {
@@ -280,6 +190,20 @@ const MatchDetails = () => {
       dispatch(clearSelectedMatch());
     };
   }, [dispatch, id]);
+
+  // Refresh while the match is being played, so the timeline fills in without
+  // the reader touching anything. A finished match never re-fetches.
+  usePolling(
+    () => {
+      if (id) dispatch(fetchMatchById({ id: Number(id) }));
+    },
+    {
+      intervalMs: 10000,
+      enabled:
+        match?.state === "LIVE" || match?.state === "HALF_TIME",
+      immediate: false,
+    }
+  );
 
   if (loading && !match) {
     return <LoadingState />;
@@ -301,10 +225,9 @@ const MatchDetails = () => {
     match.scoreAway !== null &&
     match.scoreAway !== undefined;
 
-  const showNoEvents =
-    match.state === "FINISHED" &&
-    match.goals.length === 0 &&
-    match.cards.length === 0;
+  const events = match.events ?? [];
+  const isLive = match.state === "LIVE" || match.state === "HALF_TIME";
+  const showTimeline = events.length > 0 || match.state === "FINISHED";
 
   return (
     <>
@@ -363,6 +286,12 @@ const MatchDetails = () => {
             <CalendarDays size={15} />
             {formatDateTimeDot(parseApiDate(match.timestamp))}
           </span>
+          {match.fieldName && (
+            <span>
+              <Flag size={15} />
+              {match.fieldName}
+            </span>
+          )}
           {match.location && (
             <span>
               <MapPin size={15} />
@@ -372,62 +301,30 @@ const MatchDetails = () => {
         </HeroMeta>
       </Hero>
 
-      {match.goals.length > 0 && (
+      {showTimeline && (
         <>
-          <SectionHeading title={t(language, "matchDetails.goals")} />
-          <EventsCard>
-            <GoalsGrid>
-              {match.goals.map((goal) => {
-                const side =
-                  goal.teamId === match.homeTeamId ? "home" : "away";
-                return (
-                  <GoalRow key={goal.id} $side={side}>
-                    <MinuteChip>
-                      {goal.minute !== null && goal.minute !== undefined
-                        ? `${goal.minute}′`
-                        : "—"}
-                    </MinuteChip>
-                    <GoalIcon
-                      size={15}
-                      color="var(--accent)"
-                      style={{ flexShrink: 0, marginTop: 2 }}
-                    />
-                    <GoalInfo>
-                      <strong>{goal.scorerName ?? "—"}</strong>
-                      {goal.assistName && (
-                        <small>
-                          {t(language, "matchDetails.assist")}: {goal.assistName}
-                        </small>
-                      )}
-                    </GoalInfo>
-                  </GoalRow>
-                );
-              })}
-            </GoalsGrid>
-          </EventsCard>
+          <SectionHeading
+            title={t(language, "matchDetails.timeline")}
+            subtitle={
+              isLive ? t(language, "live.autoUpdating") : undefined
+            }
+          />
+          <MatchTimeline
+            events={events}
+            homeTeamId={match.homeTeamId}
+            language={language}
+          />
         </>
       )}
 
-      {match.cards.length > 0 && (
-        <>
-          <SectionHeading title={t(language, "matchDetails.cards")} />
-          <EventsCard>
-            {match.cards.map((card) => (
-              <CardRow key={card.id}>
-                <CardRect $red={card.cardType === "RED"} />
-                <CardName>{card.playerName ?? "—"}</CardName>
-                <CardMinute>
-                  {card.minute !== null && card.minute !== undefined
-                    ? `${card.minute}′`
-                    : "—"}
-                </CardMinute>
-              </CardRow>
-            ))}
-          </EventsCard>
-        </>
+      {match.confirmedByName && (
+        <ConfirmedNote>
+          <ShieldCheck size={15} />
+          {t(language, "matchDetails.confirmedBy", {
+            name: match.confirmedByName,
+          })}
+        </ConfirmedNote>
       )}
-
-      {showNoEvents && <NoEvents>{t(language, "matchDetails.noEvents")}</NoEvents>}
     </>
   );
 };

@@ -6,7 +6,7 @@ import {
   deleteMatchThunk,
   fetchMatchById,
   fetchMatches,
-  setMatchResultThunk,
+  setMatchOperatorsThunk,
   updateMatchThunk,
 } from "./thunks/matchesThunks";
 
@@ -82,7 +82,7 @@ const matchesSlice = createSlice({
           state.selectedMatch = { ...state.selectedMatch, ...action.payload };
         }
       })
-      .addCase(setMatchResultThunk.fulfilled, (state, action) => {
+      .addCase(setMatchOperatorsThunk.fulfilled, (state, action) => {
         upsertMatch(state, action.payload);
         state.selectedMatch = action.payload;
       })

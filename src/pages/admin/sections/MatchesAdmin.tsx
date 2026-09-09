@@ -1,6 +1,7 @@
 import { Button } from "@mui/material";
-import { ClipboardList, Pencil, Plus, Trash2 } from "lucide-react";
+import { ClipboardList, Pencil, Plus, Radio, Trash2, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
 import EmptyState from "../../../components/reusable/EmptyState";
@@ -13,7 +14,9 @@ import {
   deleteMatchThunk,
   fetchMatches,
 } from "../../../store/slices/thunks/matchesThunks";
+import { fetchFields } from "../../../store/slices/thunks/fieldsThunks";
 import { fetchPlayers } from "../../../store/slices/thunks/playersThunks";
+import { fetchUsers } from "../../../store/slices/thunks/usersThunks";
 import { fetchTeams } from "../../../store/slices/thunks/teamsThunks";
 import type { Match } from "../../../types";
 import { formatDateTimeDot, parseApiDate } from "../../../utils/dateFormat";
@@ -27,7 +30,7 @@ import {
   ToolbarGroup,
 } from "../adminUi";
 import MatchModal from "../modals/MatchModal";
-import ResultModal from "../modals/ResultModal";
+import OperatorsModal from "../modals/OperatorsModal";
 
 const MatchesAdmin = () => {
   const dispatch = useAppDispatch();
@@ -40,7 +43,7 @@ const MatchesAdmin = () => {
   const seasonId = selectedSeasonId ?? activeSeason?.id ?? null;
 
   const [matchModalOpen, setMatchModalOpen] = useState(false);
-  const [resultModalOpen, setResultModalOpen] = useState(false);
+  const [operatorsModalOpen, setOperatorsModalOpen] = useState(false);
   const [editingMatch, setEditingMatch] = useState<Match | null>(null);
   const [deletingMatch, setDeletingMatch] = useState<Match | null>(null);
 
@@ -48,6 +51,8 @@ const MatchesAdmin = () => {
     dispatch(fetchMatches(seasonId ? { seasonId } : undefined));
     dispatch(fetchTeams());
     dispatch(fetchPlayers());
+    dispatch(fetchFields());
+    dispatch(fetchUsers());
   }, [dispatch, seasonId]);
 
   const sorted = useMemo(
@@ -113,6 +118,7 @@ const MatchesAdmin = () => {
                 <th>{t(language, "admin.matches.colDate")}</th>
                 <th>{t(language, "admin.matches.colRound")}</th>
                 <th>{t(language, "admin.matches.colMatch")}</th>
+                <th>{t(language, "admin.matches.colField")}</th>
                 <th>{t(language, "admin.matches.colScore")}</th>
                 <th>{t(language, "admin.matches.colState")}</th>
                 <th />
@@ -133,6 +139,9 @@ const MatchesAdmin = () => {
                     </span>
                     <strong>{match.awayTeamName}</strong>
                   </td>
+                  <td style={{ color: "var(--text-secondary)" }}>
+                    {match.fieldName ?? "—"}
+                  </td>
                   <td style={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
                     {match.scoreHome !== null &&
                     match.scoreHome !== undefined &&
@@ -147,14 +156,21 @@ const MatchesAdmin = () => {
                   <td>
                     <RowActions>
                       <IconAction
+                        as={Link}
+                        to={`/admin/live/${match.id}`}
                         $tone="accent"
-                        title={t(language, "admin.matches.setResult")}
+                        title={t(language, "admin.matches.openConsole")}
+                      >
+                        <Radio size={15} />
+                      </IconAction>
+                      <IconAction
+                        title={t(language, "admin.matches.assignOperators")}
                         onClick={() => {
                           setEditingMatch(match);
-                          setResultModalOpen(true);
+                          setOperatorsModalOpen(true);
                         }}
                       >
-                        <ClipboardList size={15} />
+                        <Users size={15} />
                       </IconAction>
                       <IconAction
                         title={t(language, "common.edit")}
@@ -187,11 +203,10 @@ const MatchesAdmin = () => {
         seasonId={seasonId}
         onClose={() => setMatchModalOpen(false)}
       />
-      <ResultModal
-        open={resultModalOpen}
+      <OperatorsModal
+        open={operatorsModalOpen}
         match={editingMatch}
-        seasonId={seasonId}
-        onClose={() => setResultModalOpen(false)}
+        onClose={() => setOperatorsModalOpen(false)}
       />
       <ConfirmDialog
         open={Boolean(deletingMatch)}

@@ -5,7 +5,6 @@ import type {
   Match,
   MatchDetails,
   MatchPayload,
-  MatchResultPayload,
   MatchState,
   MatchUpdatePayload,
 } from "../../../types";
@@ -14,6 +13,7 @@ import { getErrorMessage } from "./thunkUtils";
 export interface MatchesFilter {
   seasonId?: number;
   teamId?: number;
+  fieldId?: number;
   round?: number;
   state?: MatchState;
 }
@@ -80,20 +80,19 @@ export const updateMatchThunk = createAsyncThunk<
   }
 });
 
-export const setMatchResultThunk = createAsyncThunk<
+export const setMatchOperatorsThunk = createAsyncThunk<
   MatchDetails,
-  { id: number; data: MatchResultPayload },
+  { id: number; operatorIds: number[] },
   { rejectValue: string }
->("matches/setResult", async ({ id, data }, thunkAPI) => {
+>("matches/setOperators", async ({ id, operatorIds }, thunkAPI) => {
   try {
-    const response = await api.put<MatchDetails>(
-      `/matches/${id}/result`,
-      data
-    );
+    const response = await api.put<MatchDetails>(`/matches/${id}/operators`, {
+      operatorIds,
+    });
     return response.data;
   } catch (error: unknown) {
     return thunkAPI.rejectWithValue(
-      getErrorMessage(error, "Failed to save the match result")
+      getErrorMessage(error, "Failed to assign the operators")
     );
   }
 });

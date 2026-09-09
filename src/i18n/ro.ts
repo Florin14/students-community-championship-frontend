@@ -35,6 +35,7 @@ const ro = {
   // Match states
   "matchState.SCHEDULED": "Programat",
   "matchState.LIVE": "Live",
+  "matchState.HALF_TIME": "Pauză",
   "matchState.FINISHED": "Final",
   "matchState.POSTPONED": "Amânat",
 
@@ -153,6 +154,7 @@ const ro = {
   "playerDetails.noEventsHint":
     "Golurile, pasele decisive și cartonașele vor apărea aici.",
   "playerDetails.event.GOAL": "Gol",
+  "playerDetails.event.OWN_GOAL": "Autogol",
   "playerDetails.event.ASSIST": "Pasă decisivă",
   "playerDetails.event.YELLOW": "Cartonaș galben",
   "playerDetails.event.RED": "Cartonaș roșu",
@@ -279,25 +281,159 @@ const ro = {
   "admin.matches.colMatch": "Meci",
   "admin.matches.colScore": "Scor",
   "admin.matches.colState": "Status",
-  "admin.matches.setResult": "Introdu rezultatul",
-  "admin.matches.resultTitle": "Rezultatul meciului",
-  "admin.matches.resultSaved": "Rezultat salvat și clasament actualizat",
-  "admin.matches.goalsSection": "Goluri",
-  "admin.matches.addGoal": "Adaugă gol",
-  "admin.matches.noGoalRows":
-    "Adaugă golurile meciului (marcator, pasă decisivă, minut).",
-  "admin.matches.scorer": "Marcator",
-  "admin.matches.noAssist": "Fără pasă decisivă",
-  "admin.matches.player": "Jucător",
-  "admin.matches.minute": "Min",
-  "admin.matches.cardsSection": "Cartonașe",
-  "admin.matches.addCard": "Adaugă cartonaș",
-  "admin.matches.yellowCard": "Galben",
-  "admin.matches.redCard": "Roșu",
-  "admin.matches.saveResult": "Salvează rezultatul",
   "admin.matches.deleteTitle": "Ștergi meciul?",
   "admin.matches.deleteDescription":
     "Golurile și cartonașele meciului vor fi șterse, iar clasamentul recalculat.",
+
+  // --- Roles ---------------------------------------------------------------
+  "role.OPERATOR": "Operator",
+  "role.ADMIN": "Administrator",
+  "role.SUPER_ADMIN": "Super-admin",
+
+  // --- Event types ---------------------------------------------------------
+  "event.GOAL": "Gol",
+  "event.OWN_GOAL": "Autogol",
+  "event.YELLOW_CARD": "Cartonaș galben",
+  "event.RED_CARD": "Cartonaș roșu",
+  "event.voided": "Anulat",
+  "event.corrected": "Corectat",
+  "event.enteredBy": "Introdus de {name}",
+
+  // --- Live (public) -------------------------------------------------------
+  "nav.live": "Live",
+  "live.badge": "Se joacă acum",
+  "live.title": "Meciuri în desfășurare",
+  "live.none": "Nu se joacă nimic acum",
+  "live.noneHint": "Când începe un meci, apare aici automat.",
+  "live.minuteShort": "min {minute}",
+  "live.halfTime": "Pauză",
+  "live.autoUpdating": "Se actualizează automat",
+
+  // --- Match details -------------------------------------------------------
+  "matchDetails.timeline": "Cronologia meciului",
+  "matchDetails.ownGoal": "autogol",
+  "matchDetails.confirmedBy": "Rezultat confirmat de {name}",
+  "matchDetails.field": "Teren",
+
+  // --- Operator console ----------------------------------------------------
+  "nav.console": "Consolă live",
+  "console.title": "Consolă de arbitraj",
+  "console.subtitle": "Meciurile pe care le poți opera",
+  "console.noMatches": "Nu ai niciun meci repartizat",
+  "console.noMatchesHint":
+    "Un administrator îți repartizează meciurile pe care le vei opera.",
+  "console.open": "Deschide",
+  "console.back": "Înapoi la meciurile mele",
+  "console.start": "Începe meciul",
+  "console.pause": "Pauză",
+  "console.resume": "Reia meciul",
+  "console.finish": "Confirmă rezultatul",
+  "console.reopen": "Redeschide meciul",
+  "console.notStarted": "Meciul nu a început",
+  "console.notStartedHint":
+    "Apasă „Începe meciul” ca să pornească cronometrul și să poți introduce evenimente.",
+  "console.locked": "Rezultat confirmat",
+  "console.lockedHint":
+    "Meciul este blocat. Doar un super-admin îl poate redeschide pentru corecturi.",
+  "console.finishTitle": "Confirmi rezultatul final?",
+  "console.finishText":
+    "După confirmare meciul se blochează și rezultatul intră în clasament. Doar un super-admin îl mai poate redeschide.",
+  "console.reopenTitle": "Redeschizi meciul?",
+  "console.reopenReason": "Motivul redeschiderii",
+  "console.reopenReasonHint":
+    "Motivul rămâne în istoricul modificărilor. Minimum 3 caractere.",
+
+  // Event entry
+  "console.addGoal": "Gol",
+  "console.addOwnGoal": "Autogol",
+  "console.addYellow": "Galben",
+  "console.addRed": "Roșu",
+  "console.pickTeam": "Pentru care echipă?",
+  "console.pickScorer": "Cine a marcat?",
+  "console.pickOwnGoalPlayer": "Cine a marcat în propria poartă?",
+  "console.pickCardPlayer": "Cine a primit cartonașul?",
+  "console.pickAssist": "Pasă decisivă (opțional)",
+  "console.skipAssist": "Fără pasă decisivă",
+  "console.unknownPlayer": "Nu știu / nu e în lot",
+  "console.emptySquad": "Echipa nu are jucători în lot",
+  "console.minuteLabel": "Minutul {minute}",
+  "console.step": "Pasul {current} din {total}",
+
+  // Undo and sync
+  "console.undo": "Anulează ultima acțiune",
+  "console.undone": "Ultima acțiune a fost anulată",
+  "console.voidShort": "Anulează",
+  "console.voidEvent": "Anulează evenimentul",
+  "console.voidTitle": "Anulezi evenimentul?",
+  "console.voidText":
+    "Evenimentul nu se șterge: rămâne în istoric, marcat ca anulat, și iese din scor.",
+  "console.saved": "Salvat",
+  "console.pending": "Se sincronizează",
+  "console.failed": "Eșuat",
+  "console.offline": "Fără conexiune — acțiunile se trimit când revine semnalul",
+  "console.online": "Conectat",
+  "console.queueTitle": "Acțiuni nesincronizate",
+  "console.queueEmpty": "Totul este sincronizat",
+  "console.retry": "Reîncearcă",
+  "console.discard": "Renunță",
+  "console.attempts": "{count} încercări",
+  "console.timeline": "Ce s-a introdus",
+  "console.timelineEmpty": "Niciun eveniment încă",
+
+  // --- Admin: fields -------------------------------------------------------
+  "admin.tabFields": "Terenuri",
+  "admin.fields.add": "Teren nou",
+  "admin.fields.addTitle": "Adaugă teren",
+  "admin.fields.editTitle": "Editează terenul",
+  "admin.fields.name": "Numele terenului",
+  "admin.fields.shortName": "Nume scurt",
+  "admin.fields.location": "Locație",
+  "admin.fields.description": "Descriere",
+  "admin.fields.empty": "Niciun teren încă",
+  "admin.fields.emptyHint":
+    "Adaugă terenurile pe care se joacă, ca să poți repartiza operatori pe fiecare.",
+  "admin.fields.colName": "Teren",
+  "admin.fields.colShortName": "Scurt",
+  "admin.fields.colLocation": "Locație",
+  "admin.fields.deleteTitle": "Ștergi terenul?",
+  "admin.fields.deleteDescription":
+    "Terenul poate fi șters doar dacă nu are meciuri programate pe el.",
+
+  // --- Admin: accounts -----------------------------------------------------
+  "admin.tabUsers": "Conturi",
+  "admin.users.add": "Cont nou",
+  "admin.users.addTitle": "Adaugă cont",
+  "admin.users.editTitle": "Editează contul",
+  "admin.users.name": "Nume",
+  "admin.users.email": "Email",
+  "admin.users.password": "Parolă",
+  "admin.users.newPassword": "Parolă nouă",
+  "admin.users.passwordHint": "Minimum 8 caractere. Lasă gol ca să o păstrezi.",
+  "admin.users.role": "Rol",
+  "admin.users.isActive": "Cont activ",
+  "admin.users.empty": "Niciun cont încă",
+  "admin.users.emptyHint": "Creează conturile de operator pentru ziua meciurilor.",
+  "admin.users.colName": "Nume",
+  "admin.users.colEmail": "Email",
+  "admin.users.colRole": "Rol",
+  "admin.users.colStatus": "Status",
+  "admin.users.active": "Activ",
+  "admin.users.disabled": "Dezactivat",
+  "admin.users.deleteTitle": "Ștergi contul?",
+  "admin.users.deleteDescription":
+    "Evenimentele introduse de acest cont rămân în istoric, cu numele păstrat.",
+
+  // --- Admin: matches ------------------------------------------------------
+  "admin.matches.field": "Teren",
+  "admin.matches.noField": "Fără teren",
+  "admin.matches.colField": "Teren",
+  "admin.matches.operators": "Operatori",
+  "admin.matches.operatorsHint":
+    "Doar aceste conturi pot introduce evenimente la acest meci. Administratorii pot oricum.",
+  "admin.matches.assignOperators": "Repartizează operatori",
+  "admin.matches.operatorsSaved": "Operatori repartizați",
+  "admin.matches.openConsole": "Deschide consola",
+  "admin.matches.noOperators": "Niciun operator repartizat",
 };
 
 export default ro;

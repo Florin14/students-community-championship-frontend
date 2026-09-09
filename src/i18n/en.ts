@@ -35,6 +35,7 @@ const en = {
   // Match states
   "matchState.SCHEDULED": "Scheduled",
   "matchState.LIVE": "Live",
+  "matchState.HALF_TIME": "Half time",
   "matchState.FINISHED": "Finished",
   "matchState.POSTPONED": "Postponed",
 
@@ -153,6 +154,7 @@ const en = {
   "playerDetails.noEvents": "No events yet",
   "playerDetails.noEventsHint": "Goals, assists and cards will show up here.",
   "playerDetails.event.GOAL": "Goal",
+  "playerDetails.event.OWN_GOAL": "Own goal",
   "playerDetails.event.ASSIST": "Assist",
   "playerDetails.event.YELLOW": "Yellow card",
   "playerDetails.event.RED": "Red card",
@@ -280,24 +282,159 @@ const en = {
   "admin.matches.colMatch": "Match",
   "admin.matches.colScore": "Score",
   "admin.matches.colState": "Status",
-  "admin.matches.setResult": "Enter result",
-  "admin.matches.resultTitle": "Match result",
-  "admin.matches.resultSaved": "Result saved and standings updated",
-  "admin.matches.goalsSection": "Goals",
-  "admin.matches.addGoal": "Add goal",
-  "admin.matches.noGoalRows": "Add the goals of the match (scorer, assist, minute).",
-  "admin.matches.scorer": "Scorer",
-  "admin.matches.noAssist": "No assist",
-  "admin.matches.player": "Player",
-  "admin.matches.minute": "Min",
-  "admin.matches.cardsSection": "Cards",
-  "admin.matches.addCard": "Add card",
-  "admin.matches.yellowCard": "Yellow",
-  "admin.matches.redCard": "Red",
-  "admin.matches.saveResult": "Save result",
   "admin.matches.deleteTitle": "Delete match?",
   "admin.matches.deleteDescription":
     "Goals and cards of this match will be deleted and the standings recalculated.",
+
+  // --- Roles ---------------------------------------------------------------
+  "role.OPERATOR": "Operator",
+  "role.ADMIN": "Administrator",
+  "role.SUPER_ADMIN": "Super-admin",
+
+  // --- Event types ---------------------------------------------------------
+  "event.GOAL": "Goal",
+  "event.OWN_GOAL": "Own goal",
+  "event.YELLOW_CARD": "Yellow card",
+  "event.RED_CARD": "Red card",
+  "event.voided": "Cancelled",
+  "event.corrected": "Corrected",
+  "event.enteredBy": "Entered by {name}",
+
+  // --- Live (public) -------------------------------------------------------
+  "nav.live": "Live",
+  "live.badge": "Playing now",
+  "live.title": "Matches in progress",
+  "live.none": "Nothing is being played right now",
+  "live.noneHint": "As soon as a match kicks off it shows up here on its own.",
+  "live.minuteShort": "min {minute}",
+  "live.halfTime": "Half time",
+  "live.autoUpdating": "Updating automatically",
+
+  // --- Match details -------------------------------------------------------
+  "matchDetails.timeline": "Match timeline",
+  "matchDetails.ownGoal": "own goal",
+  "matchDetails.confirmedBy": "Result confirmed by {name}",
+  "matchDetails.field": "Field",
+
+  // --- Operator console ----------------------------------------------------
+  "nav.console": "Live console",
+  "console.title": "Scoring console",
+  "console.subtitle": "The matches you can score",
+  "console.noMatches": "No matches assigned to you",
+  "console.noMatchesHint":
+    "An administrator assigns the matches you will be scoring.",
+  "console.open": "Open",
+  "console.back": "Back to my matches",
+  "console.start": "Start the match",
+  "console.pause": "Pause",
+  "console.resume": "Resume",
+  "console.finish": "Confirm the result",
+  "console.reopen": "Reopen the match",
+  "console.notStarted": "The match has not started",
+  "console.notStartedHint":
+    "Tap \u201cStart the match\u201d to run the clock and begin entering events.",
+  "console.locked": "Result confirmed",
+  "console.lockedHint":
+    "This match is locked. Only a super-admin can reopen it for corrections.",
+  "console.finishTitle": "Confirm the final result?",
+  "console.finishText":
+    "Confirming locks the match and puts the result into the table. Only a super-admin can reopen it afterwards.",
+  "console.reopenTitle": "Reopen this match?",
+  "console.reopenReason": "Reason for reopening",
+  "console.reopenReasonHint":
+    "The reason stays in the change history. At least 3 characters.",
+
+  // Event entry
+  "console.addGoal": "Goal",
+  "console.addOwnGoal": "Own goal",
+  "console.addYellow": "Yellow",
+  "console.addRed": "Red",
+  "console.pickTeam": "For which team?",
+  "console.pickScorer": "Who scored?",
+  "console.pickOwnGoalPlayer": "Who put it in their own net?",
+  "console.pickCardPlayer": "Who was booked?",
+  "console.pickAssist": "Assist (optional)",
+  "console.skipAssist": "No assist",
+  "console.unknownPlayer": "Unknown / not in the squad",
+  "console.emptySquad": "This team has no players in its squad",
+  "console.minuteLabel": "Minute {minute}",
+  "console.step": "Step {current} of {total}",
+
+  // Undo and sync
+  "console.undo": "Undo the last action",
+  "console.undone": "The last action was cancelled",
+  "console.voidShort": "Cancel",
+  "console.voidEvent": "Cancel this event",
+  "console.voidTitle": "Cancel this event?",
+  "console.voidText":
+    "The event is not deleted: it stays in the history marked as cancelled and drops out of the score.",
+  "console.saved": "Saved",
+  "console.pending": "Syncing",
+  "console.failed": "Failed",
+  "console.offline": "No connection \u2014 actions are sent when the signal returns",
+  "console.online": "Connected",
+  "console.queueTitle": "Unsynced actions",
+  "console.queueEmpty": "Everything is synced",
+  "console.retry": "Retry",
+  "console.discard": "Discard",
+  "console.attempts": "{count} attempts",
+  "console.timeline": "What was entered",
+  "console.timelineEmpty": "No events yet",
+
+  // --- Admin: fields -------------------------------------------------------
+  "admin.tabFields": "Fields",
+  "admin.fields.add": "New field",
+  "admin.fields.addTitle": "Add a field",
+  "admin.fields.editTitle": "Edit the field",
+  "admin.fields.name": "Field name",
+  "admin.fields.shortName": "Short name",
+  "admin.fields.location": "Location",
+  "admin.fields.description": "Description",
+  "admin.fields.empty": "No fields yet",
+  "admin.fields.emptyHint":
+    "Add the surfaces matches are played on, so operators can be assigned per field.",
+  "admin.fields.colName": "Field",
+  "admin.fields.colShortName": "Short",
+  "admin.fields.colLocation": "Location",
+  "admin.fields.deleteTitle": "Delete this field?",
+  "admin.fields.deleteDescription":
+    "A field can only be deleted while no matches are scheduled on it.",
+
+  // --- Admin: accounts -----------------------------------------------------
+  "admin.tabUsers": "Accounts",
+  "admin.users.add": "New account",
+  "admin.users.addTitle": "Add an account",
+  "admin.users.editTitle": "Edit the account",
+  "admin.users.name": "Name",
+  "admin.users.email": "Email",
+  "admin.users.password": "Password",
+  "admin.users.newPassword": "New password",
+  "admin.users.passwordHint": "At least 8 characters. Leave empty to keep it.",
+  "admin.users.role": "Role",
+  "admin.users.isActive": "Account active",
+  "admin.users.empty": "No accounts yet",
+  "admin.users.emptyHint": "Create the operator accounts for match day.",
+  "admin.users.colName": "Name",
+  "admin.users.colEmail": "Email",
+  "admin.users.colRole": "Role",
+  "admin.users.colStatus": "Status",
+  "admin.users.active": "Active",
+  "admin.users.disabled": "Disabled",
+  "admin.users.deleteTitle": "Delete this account?",
+  "admin.users.deleteDescription":
+    "Events entered by this account stay in the history, with the name kept.",
+
+  // --- Admin: matches ------------------------------------------------------
+  "admin.matches.field": "Field",
+  "admin.matches.noField": "No field",
+  "admin.matches.colField": "Field",
+  "admin.matches.operators": "Operators",
+  "admin.matches.operatorsHint":
+    "Only these accounts can enter events for this match. Administrators always can.",
+  "admin.matches.assignOperators": "Assign operators",
+  "admin.matches.operatorsSaved": "Operators assigned",
+  "admin.matches.openConsole": "Open the console",
+  "admin.matches.noOperators": "No operators assigned",
 };
 
 export default en;

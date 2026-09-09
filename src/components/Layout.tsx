@@ -8,6 +8,7 @@ import {
   LogOut,
   Menu as MenuIcon,
   Moon,
+  Radio,
   Shield,
   Sun,
   Trophy,
@@ -20,6 +21,7 @@ import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { TranslationKey, t } from "../i18n";
+import { covers } from "../utils/roles";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout } from "../store/slices/authSlice";
 import { setLanguage } from "../store/slices/i18nSlice";
@@ -251,6 +253,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { key: "nav.home", to: "/", icon: Home, end: true },
+  { key: "nav.live", to: "/live", icon: Radio },
   { key: "nav.matches", to: "/matches", icon: CalendarDays },
   { key: "nav.standings", to: "/standings", icon: ListOrdered },
   { key: "nav.teams", to: "/teams", icon: Users },
@@ -268,6 +271,9 @@ const Layout = () => {
 
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [adminAnchor, setAdminAnchor] = useState<null | HTMLElement>(null);
+
+  // An operator has no admin panel, so the shield goes straight to the console.
+  const canAdminister = covers(user?.role, "ADMIN");
 
   const handleAdminClick = (event: MouseEvent<HTMLElement>) => {
     if (isAuthenticated) {
@@ -358,12 +364,23 @@ const Layout = () => {
         <MenuItem
           onClick={() => {
             setAdminAnchor(null);
-            navigate("/admin");
+            navigate("/admin/live");
           }}
         >
-          <Shield size={15} style={{ marginRight: 8 }} />
-          {t(language, "nav.adminPanel")}
+          <Radio size={15} style={{ marginRight: 8 }} />
+          {t(language, "nav.console")}
         </MenuItem>
+        {canAdminister && (
+          <MenuItem
+            onClick={() => {
+              setAdminAnchor(null);
+              navigate("/admin");
+            }}
+          >
+            <Shield size={15} style={{ marginRight: 8 }} />
+            {t(language, "nav.adminPanel")}
+          </MenuItem>
+        )}
         <MenuItem onClick={handleLogout}>
           <LogOut size={15} style={{ marginRight: 8 }} />
           {t(language, "nav.logout")}
@@ -397,13 +414,24 @@ const Layout = () => {
               {t(language, key)}
             </DrawerLink>
           ))}
-          <DrawerLink
-            to={isAuthenticated ? "/admin" : "/admin/login"}
-            onClick={() => setDrawerOpen(false)}
-          >
-            <Shield size={17} />
-            {t(language, "nav.admin")}
-          </DrawerLink>
+          {isAuthenticated && (
+            <DrawerLink
+              to="/admin/live"
+              onClick={() => setDrawerOpen(false)}
+            >
+              <Radio size={17} />
+              {t(language, "nav.console")}
+            </DrawerLink>
+          )}
+          {(!isAuthenticated || canAdminister) && (
+            <DrawerLink
+              to={isAuthenticated ? "/admin" : "/admin/login"}
+              onClick={() => setDrawerOpen(false)}
+            >
+              <Shield size={17} />
+              {t(language, "nav.admin")}
+            </DrawerLink>
+          )}
           {isAuthenticated && (
             <DrawerLink
               to="/"

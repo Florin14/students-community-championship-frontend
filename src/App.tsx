@@ -7,11 +7,14 @@ import {
 } from "react-router-dom";
 
 import Layout from "./components/Layout";
-import RequireAdmin from "./components/RequireAdmin";
+import RequireRole from "./components/RequireRole";
 import LoadingState from "./components/reusable/LoadingState";
 import Admin from "./pages/admin/Admin";
 import AdminLogin from "./pages/admin/AdminLogin";
+import OperatorMatches from "./pages/live/OperatorMatches";
+import ScoringConsole from "./pages/live/ScoringConsole";
 import Home from "./pages/Home";
+import LiveScores from "./pages/LiveScores";
 import MatchDetails from "./pages/MatchDetails";
 import Matches from "./pages/Matches";
 import NotFound from "./pages/NotFound";
@@ -34,6 +37,7 @@ const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { index: true, element: <Home /> },
+      { path: "live", element: <LiveScores /> },
       { path: "matches", element: <Matches /> },
       { path: "matches/:id", element: <MatchDetails /> },
       { path: "standings", element: <Standings /> },
@@ -44,8 +48,17 @@ const router = createBrowserRouter([
       { path: "stats", element: <Stats /> },
       { path: "admin/login", element: <AdminLogin /> },
       {
+        // Scoring is open to operators; running the competition is not.
+        path: "admin/live",
+        element: <RequireRole minRole="OPERATOR" />,
+        children: [
+          { index: true, element: <OperatorMatches /> },
+          { path: ":matchId", element: <ScoringConsole /> },
+        ],
+      },
+      {
         path: "admin",
-        element: <RequireAdmin />,
+        element: <RequireRole minRole="ADMIN" />,
         children: [{ index: true, element: <Admin /> }],
       },
       { path: "not-found", element: <NotFound /> },

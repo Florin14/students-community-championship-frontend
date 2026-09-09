@@ -1,14 +1,16 @@
-import { CalendarDays, Trophy, User, Users } from "lucide-react";
+import { CalendarDays, Flag, Trophy, User, UserCog, Users } from "lucide-react";
 import { useState } from "react";
 import styled from "styled-components";
 
 import SectionHeading from "../../components/reusable/SectionHeading";
 import { TranslationKey, t } from "../../i18n";
 import { useAppSelector } from "../../store/hooks";
+import FieldsAdmin from "./sections/FieldsAdmin";
 import MatchesAdmin from "./sections/MatchesAdmin";
 import PlayersAdmin from "./sections/PlayersAdmin";
 import SeasonsAdmin from "./sections/SeasonsAdmin";
 import TeamsAdmin from "./sections/TeamsAdmin";
+import UsersAdmin from "./sections/UsersAdmin";
 
 const Tabs = styled.div`
   display: flex;
@@ -45,13 +47,21 @@ const TabButton = styled.button<{ $active: boolean }>`
   }
 `;
 
-type AdminTab = "matches" | "teams" | "players" | "seasons";
+type AdminTab =
+  | "matches"
+  | "teams"
+  | "players"
+  | "seasons"
+  | "fields"
+  | "users";
 
 const TABS: { key: AdminTab; label: TranslationKey; icon: typeof Users }[] = [
   { key: "matches", label: "admin.tabMatches", icon: CalendarDays },
   { key: "teams", label: "admin.tabTeams", icon: Users },
   { key: "players", label: "admin.tabPlayers", icon: User },
   { key: "seasons", label: "admin.tabSeasons", icon: Trophy },
+  { key: "fields", label: "admin.tabFields", icon: Flag },
+  { key: "users", label: "admin.tabUsers", icon: UserCog },
 ];
 
 const Admin = () => {
@@ -81,6 +91,8 @@ const Admin = () => {
       {tab === "teams" && <TeamsAdmin />}
       {tab === "players" && <PlayersAdmin />}
       {tab === "seasons" && <SeasonsAdmin />}
+      {tab === "fields" && <FieldsAdmin />}
+      {tab === "users" && <UsersAdmin />}
     </>
   );
 };

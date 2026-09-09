@@ -6,6 +6,7 @@ import {
   DialogContentText,
   DialogTitle,
 } from "@mui/material";
+import type { ReactNode } from "react";
 
 interface ConfirmDialogProps {
   open: boolean;
@@ -14,6 +15,10 @@ interface ConfirmDialogProps {
   confirmLabel: string;
   cancelLabel: string;
   destructive?: boolean;
+  /** Blocks confirmation while a required input inside `children` is incomplete. */
+  confirmDisabled?: boolean;
+  /** Extra content - a required reason field, for instance - under the description. */
+  children?: ReactNode;
   onConfirm: () => void;
   onClose: () => void;
 }
@@ -25,6 +30,8 @@ const ConfirmDialog = ({
   confirmLabel,
   cancelLabel,
   destructive = false,
+  confirmDisabled = false,
+  children,
   onConfirm,
   onClose,
 }: ConfirmDialogProps) => (
@@ -32,11 +39,14 @@ const ConfirmDialog = ({
     <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
       {title}
     </DialogTitle>
-    {description && (
+    {(description || children) && (
       <DialogContent>
-        <DialogContentText sx={{ color: "var(--text-secondary)" }}>
-          {description}
-        </DialogContentText>
+        {description && (
+          <DialogContentText sx={{ color: "var(--text-secondary)" }}>
+            {description}
+          </DialogContentText>
+        )}
+        {children && <div style={{ marginTop: description ? 18 : 0 }}>{children}</div>}
       </DialogContent>
     )}
     <DialogActions sx={{ px: 3, pb: 2.5 }}>
@@ -46,6 +56,7 @@ const ConfirmDialog = ({
       <Button
         onClick={onConfirm}
         variant="contained"
+        disabled={confirmDisabled}
         color={destructive ? "error" : "primary"}
       >
         {confirmLabel}
