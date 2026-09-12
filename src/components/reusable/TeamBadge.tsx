@@ -14,7 +14,7 @@ const Badge = styled.div<{ $size: number; $ring?: string | null }>`
   background: var(--bg-surface);
   border: 2px solid ${({ $ring }) => $ring || "var(--border-strong)"};
   color: var(--text-primary);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   font-size: ${({ $size }) => Math.max(10, Math.round($size * 0.32))}px;
   letter-spacing: 0.02em;

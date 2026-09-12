@@ -34,7 +34,7 @@ const Badge = styled.span`
   border-radius: 999px;
   background: var(--danger-soft);
   color: var(--danger);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -81,7 +81,7 @@ const Team = styled.div`
   min-width: 0;
 
   span {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 0.88rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -90,7 +90,7 @@ const Team = styled.div`
 `;
 
 const Goals = styled.strong`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-primary);

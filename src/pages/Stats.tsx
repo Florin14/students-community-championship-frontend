@@ -15,7 +15,6 @@ import {
 import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
-import SeasonSelector from "../components/reusable/SeasonSelector";
 import SectionHeading from "../components/reusable/SectionHeading";
 import StatCard from "../components/reusable/StatCard";
 import { t } from "../i18n";
@@ -107,7 +106,7 @@ const Row = styled(Link)`
 const Rank = styled.span<{ $top: boolean }>`
   width: 22px;
   text-align: center;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.8rem;
   color: ${({ $top }) => ($top ? "var(--accent)" : "var(--text-disabled)")};
@@ -131,7 +130,7 @@ const TeamTag = styled.span`
 `;
 
 const Value = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.88rem;
   color: var(--text-primary);
@@ -141,7 +140,7 @@ const CardsCount = styled.span<{ $tone: "warning" | "danger" }>`
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.85rem;
   color: var(--text-primary);
@@ -218,12 +217,6 @@ const Stats = () => {
 
   return (
     <>
-      <SectionHeading
-        title={t(language, "stats.title")}
-        subtitle={t(language, "stats.subtitle")}
-        action={<SeasonSelector />}
-      />
-
       <StatsGrid>
         <StatCard
           icon={Goal}

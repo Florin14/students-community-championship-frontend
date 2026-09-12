@@ -40,7 +40,7 @@ export const BigButton = styled.button<{
   border: 1px solid transparent;
   border-radius: 14px;
   cursor: pointer;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1rem;
   font-weight: 700;
   letter-spacing: 0.01em;
@@ -96,7 +96,7 @@ export const ScoreTeam = styled.div<{ $align: "left" | "right" }>`
   min-width: 0;
 
   strong {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 0.95rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -106,7 +106,7 @@ export const ScoreTeam = styled.div<{ $align: "left" | "right" }>`
 `;
 
 export const ScoreValue = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 2.4rem;
   font-weight: 800;
   line-height: 1;
@@ -127,7 +127,7 @@ export const ClockRow = styled.div`
   gap: 8px;
   padding: 10px 16px;
   border-bottom: 1px solid var(--divider);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--text-secondary);
@@ -180,7 +180,7 @@ export const SheetHeader = styled.div`
   border-bottom: 1px solid var(--divider);
 
   h3 {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 1.02rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -228,7 +228,7 @@ export const SquadLabel = styled.div<{ $color?: string | null }>`
   align-items: center;
   gap: 7px;
   padding: 0 2px 4px;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -258,7 +258,7 @@ export const PlayerButton = styled.button`
   color: var(--text-primary);
   cursor: pointer;
   text-align: left;
-  font-family: "Manrope", sans-serif;
+  font-family: var(--font-body);
   font-size: 0.92rem;
   font-weight: 600;
 
@@ -282,7 +282,7 @@ export const ShirtNumber = styled.span`
   border-radius: 8px;
   background: var(--accent-soft);
   color: var(--accent);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.78rem;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
@@ -313,7 +313,7 @@ export const MinuteControl = styled.div`
     border: 1px solid var(--border);
     background: var(--bg-surface);
     color: var(--text-primary);
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 0.95rem;
     font-weight: 700;
     font-variant-numeric: tabular-nums;

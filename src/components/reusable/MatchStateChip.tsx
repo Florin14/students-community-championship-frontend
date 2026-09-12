@@ -16,7 +16,7 @@ const Chip = styled.span<{ $state: MatchState }>`
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   letter-spacing: 0.04em;
   text-transform: uppercase;
   background: ${({ $state }) =>

@@ -43,7 +43,7 @@ const ActiveBadge = styled.span`
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   background: var(--accent-soft);
@@ -259,7 +259,7 @@ const SeasonsAdmin = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {t(language, "admin.seasons.teamsTitle")} — {teamsSeason?.name}
         </DialogTitle>
         <DialogContent>

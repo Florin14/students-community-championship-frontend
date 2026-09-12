@@ -72,7 +72,7 @@ const HeroTop = styled.div`
 `;
 
 const RoundChip = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 700;
   padding: 4px 10px;
@@ -105,7 +105,7 @@ const TeamSide = styled(Link)<{ $align: "left" | "right" }>`
 `;
 
 const TeamName = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 1.05rem;
   color: var(--text-primary);
@@ -116,7 +116,7 @@ const TeamName = styled.span`
 `;
 
 const BigScore = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 2.6rem;
   font-weight: 800;
   color: var(--text-primary);
@@ -133,7 +133,7 @@ const BigScore = styled.div`
 `;
 
 const BigVs = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.2rem;
   font-weight: 800;
   color: var(--text-disabled);

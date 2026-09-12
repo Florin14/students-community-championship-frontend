@@ -41,7 +41,7 @@ const Avatar = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--text-secondary);
 
@@ -162,7 +162,7 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {player
             ? t(language, "admin.players.editTitle")
             : t(language, "admin.players.addTitle")}

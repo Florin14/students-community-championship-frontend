@@ -1,0 +1,37 @@
+# Frontend stack: the built bundle, served by nginx.
+#
+#   docker compose up -d --build          local, with the port forward
+#   docker compose -f docker-compose.yml up -d
+#                                         deployed shape: no published ports,
+#                                         the platform proxy fronts it
+#
+# The override file is loaded automatically and is LOCAL ONLY, so a deployment
+# must pass `-f docker-compose.yml` explicitly.
+#
+# This is a separate stack from the backend on purpose: the browser talks to the
+# API directly over its public URL (API_URL below), so the two never need to
+# share a Docker network.
+
+# Project name is env-scoped so the local, testing and staging stacks can share
+# a host without their containers and network colliding.
+name: ${ENV:-local}-scc-frontend
+
+include:
+  - env.yml
+
+services:
+  web:
+    image: ${WEB_IMAGE:-students-community-championship-frontend:${APP_VERSION:-local}}
+    build:
+      context: .
+      args:
+        VERSION: ${APP_VERSION:-local}
+        GIT_SHA: ${GIT_SHA:-dev}
+        BUILD_DATE: ${BUILD_DATE:-}
+    container_name: ${ENV:-local}-scc-web
+    # Health comes from the image's own HEALTHCHECK (see the Dockerfile).
+    restart: always
+
+networks:
+  default:
+    name: "${ENV:-local}-scc-frontend-network"

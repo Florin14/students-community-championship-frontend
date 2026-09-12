@@ -124,7 +124,7 @@ const UserModal = ({ open, user, onClose }: UserModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {t(
             language,
             user ? "admin.users.editTitle" : "admin.users.addTitle"

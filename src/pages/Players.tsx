@@ -6,8 +6,6 @@ import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
-import SeasonSelector from "../components/reusable/SeasonSelector";
-import SectionHeading from "../components/reusable/SectionHeading";
 import StyledSelect from "../components/reusable/StyledSelect";
 import StyledTextField from "../components/reusable/StyledTextField";
 import { t } from "../i18n";
@@ -19,8 +17,10 @@ import { imageSrc } from "../utils/images";
 const Filters = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 20px;
 `;
 
 const TableCard = styled.div`
@@ -110,7 +110,7 @@ const Avatar = styled.span`
   justify-content: center;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.68rem;
   font-weight: 800;
   color: var(--text-secondary);
@@ -123,13 +123,13 @@ const Avatar = styled.span`
 `;
 
 const GoalsValue = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   color: var(--accent);
 `;
 
 const AssistsValue = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--violet);
 `;
@@ -226,35 +226,28 @@ const Players = () => {
 
   return (
     <>
-      <SectionHeading
-        title={t(language, "players.title")}
-        subtitle={t(language, "players.subtitle")}
-        action={
-          <Filters>
-            <StyledTextField
-              size="small"
-              placeholder={t(language, "common.search")}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            <StyledSelect
-              size="small"
-              value={teamFilter}
-              onChange={(event) => setTeamFilter(String(event.target.value))}
-              displayEmpty
-              sx={{ minWidth: 180 }}
-            >
-              <MenuItem value="">{t(language, "players.allTeams")}</MenuItem>
-              {teams.map((team) => (
-                <MenuItem key={team.id} value={String(team.id)}>
-                  {team.name}
-                </MenuItem>
-              ))}
-            </StyledSelect>
-            <SeasonSelector />
-          </Filters>
-        }
-      />
+      <Filters>
+        <StyledTextField
+          size="small"
+          placeholder={t(language, "common.search")}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+        <StyledSelect
+          size="small"
+          value={teamFilter}
+          onChange={(event) => setTeamFilter(String(event.target.value))}
+          displayEmpty
+          sx={{ minWidth: 180 }}
+        >
+          <MenuItem value="">{t(language, "players.allTeams")}</MenuItem>
+          {teams.map((team) => (
+            <MenuItem key={team.id} value={String(team.id)}>
+              {team.name}
+            </MenuItem>
+          ))}
+        </StyledSelect>
+      </Filters>
 
       {loading && players.length === 0 ? (
         <LoadingState />

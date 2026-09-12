@@ -34,7 +34,7 @@ const Row = styled.li<{ $voided: boolean; $away: boolean }>`
 const Minute = styled.span`
   min-width: 38px;
   flex: none;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-secondary);
@@ -94,7 +94,7 @@ const VoidButton = styled.button`
   background: transparent;
   color: var(--text-secondary);
   cursor: pointer;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 700;
 `;

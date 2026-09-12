@@ -144,7 +144,7 @@ const PlayersAdmin = () => {
             <tbody>
               {filtered.map((player) => (
                 <tr key={player.id}>
-                  <td style={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+                  <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
                     {player.shirtNumber ?? "—"}
                   </td>
                   <td>

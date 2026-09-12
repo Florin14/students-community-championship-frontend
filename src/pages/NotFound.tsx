@@ -18,7 +18,7 @@ const Wrapper = styled(motion.div)`
 `;
 
 const Code = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 5rem;
   font-weight: 800;
   line-height: 1;

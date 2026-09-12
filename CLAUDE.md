@@ -8,19 +8,38 @@ where operators score matches live from their phones.
 
 ```bash
 npm install
-cp .env.example .env          # VITE_API_URL, defaults to http://localhost:8000/
+cp .env.template .env         # VITE_API_URL, defaults to http://localhost:8000/
 npm run dev                   # dev server
 npm run type-check            # tsc --noEmit — must pass before every commit
 npm run lint
 npm run build                 # type-check + production build
+
+# The built bundle behind nginx, exactly as it deploys (:3000)
+docker compose up -d --build
+docker compose -f docker-compose.yml up -d   # deployed shape: no ports, no mounts
 ```
+
+## API base URL
+
+Resolved in `src/api/config.ts`, most specific first:
+
+1. `window.__SCC_CONFIG__.API_URL` from `/runtime-config.js`, written by the
+   container at start-up from `API_URL` — this is what lets one image serve
+   every environment.
+2. `VITE_API_URL`, inlined at build time — `npm run dev` and static hosts.
+3. `http://localhost:8000/`.
+
+Adding a runtime setting means touching four places: `docker/40-runtime-config.sh`,
+`env.yml`, the `SccRuntimeConfig` interface in `src/vite-env.d.ts`, and
+`.env.template`.
 
 ## Architecture
 
 ```
 src/
   api/config.ts        the single axios instance; attaches the bearer token
-  components/          Layout, RequireAuth, GlobalSnackbar
+  components/          Layout (header only), DashboardBand (stats, hero, the ONE
+                       row of NavTabs), RequireRole, GlobalSnackbar
     reusable/          shared presentational pieces (MatchCard, TeamBadge, StatCard…)
   i18n/                flat-key dictionaries; t(language, key)
   pages/               one file per public page
@@ -38,7 +57,12 @@ src/
 - **Styling is styled-components first**, MUI second. Colors come from CSS
   variables (`--bg-*`, `--text-*`, `--accent`), defined in `index.css` and
   switched by the `data-theme` attribute. Never hardcode a hex in a component.
-- **Fonts:** Sora for headings and labels, Manrope for body.
+- **Fonts:** Chivo for headings and labels, Space Grotesk for body — through
+  `var(--font-heading)` / `var(--font-body)`, never a literal family name.
+- **Palette** (from the client's sheet): primary orange `#FF6B00` (`--accent`),
+  secondary purple `#7928CA` (`--secondary`), tertiary violet `#8B5CF6`
+  (`--violet`), neutral plum `#120524` as the dark background. Green/amber/red
+  (`--success` / `--warning` / `--danger`) are reserved for W/D/L and +/-.
 - **i18n:** every user-facing string goes through `t(language, "some.key")` with
   the key added to both `i18n/ro.ts` and `i18n/en.ts`. Romanian is the default.
 - **State:** server data lives in slices, fetched by thunks in

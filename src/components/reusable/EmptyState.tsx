@@ -18,7 +18,7 @@ const Wrapper = styled.div`
 `;
 
 const Title = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 600;
   font-size: 1rem;
   color: var(--text-primary);

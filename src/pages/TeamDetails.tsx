@@ -91,7 +91,7 @@ const StatChip = styled.div`
   border: 1px solid var(--border);
 
   strong {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 1rem;
     font-weight: 800;
     color: var(--text-primary);
@@ -147,7 +147,7 @@ const ShirtNumber = styled.span`
   justify-content: center;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.8rem;
   color: var(--text-primary);
@@ -170,7 +170,7 @@ const PositionTag = styled.span`
 `;
 
 const GoalsCount = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 800;
   font-size: 0.85rem;
   color: var(--accent);

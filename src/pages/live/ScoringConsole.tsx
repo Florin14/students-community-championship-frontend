@@ -71,7 +71,7 @@ const BackLink = styled(Link)`
 
 const SectionLabel = styled.div`
   padding: 14px 16px 10px;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 700;
   text-transform: uppercase;

@@ -1,0 +1,16 @@
+# Everything the build has no use for. node_modules especially: it is installed
+# inside the image from the lockfile, and shipping the host's copy would both
+# bloat the context and risk platform-specific binaries.
+node_modules/
+dist/
+.git/
+.gitignore
+.env
+.env.local
+.env.template
+*.local
+docker-compose*.yml
+env.yml
+port_forwards.yml
+*.md
+!CLAUDE.md

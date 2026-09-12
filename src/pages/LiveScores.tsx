@@ -5,7 +5,6 @@ import styled from "styled-components";
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
 import MatchTimeline from "../components/reusable/MatchTimeline";
-import SectionHeading from "../components/reusable/SectionHeading";
 import TeamBadge from "../components/reusable/TeamBadge";
 import { usePolling } from "../hooks/usePolling";
 import { t } from "../i18n";
@@ -51,7 +50,7 @@ const Side = styled.div<{ $align: "left" | "right" }>`
   flex-direction: ${({ $align }) => ($align === "right" ? "row-reverse" : "row")};
 
   strong {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 1rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -67,7 +66,7 @@ const Middle = styled.div`
 `;
 
 const Score = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.9rem;
   font-weight: 800;
   line-height: 1;
@@ -84,7 +83,7 @@ const Clock = styled.span`
   border-radius: 999px;
   background: var(--danger-soft);
   color: var(--danger);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.71rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -110,11 +109,6 @@ const LiveScores = () => {
 
   return (
     <>
-      <SectionHeading
-        title={t(language, "live.title")}
-        subtitle={t(language, "live.autoUpdating")}
-      />
-
       {matches.length === 0 ? (
         <EmptyState
           icon={Radio}

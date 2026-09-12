@@ -3,6 +3,8 @@ const en = {
   "app.name": "Students Community Championship",
   "app.shortName": "SCC",
   "app.tagline": "Championship",
+  "app.brand": "Student League",
+  "app.seasonLabel": "Season",
 
   // Navigation
   "nav.home": "Home",
@@ -14,6 +16,8 @@ const en = {
   "nav.admin": "Admin",
   "nav.adminPanel": "Admin panel",
   "nav.logout": "Log out",
+  "nav.lightMode": "Light mode",
+  "nav.darkMode": "Dark mode",
 
   // Footer
   "footer.tagline": "The students' championship, all in one place",
@@ -21,6 +25,9 @@ const en = {
   // Common
   "common.viewAll": "View all",
   "common.goalsShort": "goals",
+  "common.goals": "Goals",
+  "common.assistsShort": "assists",
+  "common.playersShort": "players",
   "common.search": "Search...",
   "common.all": "All",
   "common.cancel": "Cancel",
@@ -69,6 +76,17 @@ const en = {
   "home.noResultsHint": "Results will appear after the first matches are played.",
   "home.noStandings": "No standings yet",
   "home.noScorers": "No goals scored yet",
+  "home.noAssists": "No assists yet",
+  "home.noTeams": "No teams yet",
+  "home.tabStandings": "Standings",
+  "home.tabMatches": "Matches",
+  "home.tabPlayers": "Players",
+  "home.tabTeams": "Teams",
+  "home.statAvgGoals": "Avg goals / game",
+  "home.statCards": "Total cards",
+  "home.topScorerLabel": "Top scorer",
+  "home.topAssists": "Top assists",
+  "home.roundShort": "Rd",
 
   // Standings
   "standings.title": "Standings",
@@ -85,6 +103,8 @@ const en = {
   "standings.hdrGoalsAgainst": "GA",
   "standings.hdrPoints": "Pts",
   "standings.hdrForm": "Form",
+  "standings.hdrDiff": "GD",
+  "standings.legendTop": "Top three places",
   "standings.ptsShort": "pts",
 
   // Matches

@@ -26,7 +26,7 @@ const Brand = styled.div`
   display: flex;
   align-items: center;
   gap: 10px;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-weight: 700;
   color: var(--text-primary);
 

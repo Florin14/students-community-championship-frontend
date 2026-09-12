@@ -13,7 +13,6 @@ import Admin from "./pages/admin/Admin";
 import AdminLogin from "./pages/admin/AdminLogin";
 import OperatorMatches from "./pages/live/OperatorMatches";
 import ScoringConsole from "./pages/live/ScoringConsole";
-import Home from "./pages/Home";
 import LiveScores from "./pages/LiveScores";
 import MatchDetails from "./pages/MatchDetails";
 import Matches from "./pages/Matches";
@@ -36,11 +35,11 @@ const router = createBrowserRouter([
     path: "/",
     element: <Layout />,
     children: [
-      { index: true, element: <Home /> },
+      { index: true, element: <Standings /> },
       { path: "live", element: <LiveScores /> },
       { path: "matches", element: <Matches /> },
       { path: "matches/:id", element: <MatchDetails /> },
-      { path: "standings", element: <Standings /> },
+      { path: "standings", element: <Navigate to="/" replace /> },
       { path: "teams", element: <Teams /> },
       { path: "teams/:id", element: <TeamDetails /> },
       { path: "players", element: <Players /> },

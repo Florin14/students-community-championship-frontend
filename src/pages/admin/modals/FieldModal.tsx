@@ -83,7 +83,7 @@ const FieldModal = ({ open, field, onClose }: FieldModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {t(
             language,
             field ? "admin.fields.editTitle" : "admin.fields.addTitle"

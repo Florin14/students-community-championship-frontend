@@ -32,7 +32,7 @@ const TabButton = styled.button<{ $active: boolean }>`
   cursor: pointer;
   padding: 10px 18px;
   border-radius: 12px;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.87rem;
   font-weight: 600;
   transition: all 0.15s ease;
