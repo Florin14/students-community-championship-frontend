@@ -97,7 +97,7 @@ const OperatorsModal = ({ open, match, onClose }: OperatorsModalProps) => {
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+      <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
         {t(language, "admin.matches.operators")}
       </DialogTitle>
       <DialogContent>

@@ -37,7 +37,7 @@ export const AdminTable = styled.table`
   th {
     text-align: left;
     padding: 12px 16px;
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 0.72rem;
     font-weight: 700;
     text-transform: uppercase;

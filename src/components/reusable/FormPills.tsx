@@ -5,24 +5,30 @@ const Row = styled.div`
   gap: 4px;
 `;
 
+// W / D / L as small tinted squares: readable at a glance, no colour alone
+// carries the meaning since the letter is always printed.
 const Pill = styled.span<{ $result: string }>`
-  width: 22px;
-  height: 22px;
-  border-radius: 7px;
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 800;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   color: ${({ $result }) =>
-    $result === "D" ? "var(--text-primary)" : "#0B0F1A"};
-  background: ${({ $result }) =>
     $result === "W"
-      ? "var(--accent)"
+      ? "var(--success)"
       : $result === "L"
         ? "var(--danger)"
-        : "var(--bg-surface-hover)"};
+        : "var(--warning)"};
+  background: ${({ $result }) =>
+    $result === "W"
+      ? "var(--success-soft)"
+      : $result === "L"
+        ? "var(--danger-soft)"
+        : "var(--warning-soft)"};
 `;
 
 interface FormPillsProps {

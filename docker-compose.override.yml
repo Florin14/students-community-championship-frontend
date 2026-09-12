@@ -1,0 +1,17 @@
+# Local development only. Compose loads this file automatically, which is why
+# any deployment command passes `-f docker-compose.yml` explicitly.
+#
+# Note this stack serves the BUILT bundle - it is how you check the production
+# artefact, the nginx rules and the runtime config before shipping. For the
+# edit-refresh loop use `npm run dev`, which is faster and hot-reloads.
+
+include:
+  - port_forwards.yml
+
+services:
+  web:
+    volumes:
+      # Edit the nginx rules or the runtime-config script and `docker compose
+      # restart web` picks them up, with no rebuild.
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./docker/40-runtime-config.sh:/docker-entrypoint.d/40-runtime-config.sh:ro

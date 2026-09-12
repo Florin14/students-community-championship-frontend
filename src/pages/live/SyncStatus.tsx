@@ -41,7 +41,7 @@ const RowText = styled.div`
   gap: 2px;
 
   strong {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 0.85rem;
     font-weight: 700;
   }
@@ -65,7 +65,7 @@ const MiniButton = styled.button<{ $tone?: "danger" }>`
   cursor: pointer;
   font-size: 0.78rem;
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   color: ${({ $tone }) =>
     $tone === "danger" ? "var(--danger)" : "var(--text-primary)"};
 `;

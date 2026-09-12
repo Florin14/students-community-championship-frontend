@@ -39,7 +39,7 @@ const IconBadge = styled.div`
   align-items: center;
   justify-content: center;
   background: linear-gradient(135deg, var(--accent), var(--violet));
-  color: #0b0f1a;
+  color: var(--accent-contrast);
   margin-bottom: 4px;
 `;
 

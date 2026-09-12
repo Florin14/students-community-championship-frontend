@@ -49,7 +49,7 @@ const Minute = styled.span`
   border-radius: 999px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--text-secondary);

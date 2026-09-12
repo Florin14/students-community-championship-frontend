@@ -57,7 +57,7 @@ const Avatar = styled.div`
   justify-content: center;
   background: var(--bg-surface);
   border: 2px solid var(--border-strong);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.4rem;
   font-weight: 800;
   color: var(--text-secondary);
@@ -97,7 +97,7 @@ const PositionChip = styled.span`
   color: var(--violet);
   font-size: 0.75rem;
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
 `;
 
 const TeamChip = styled(Link)`
@@ -119,7 +119,7 @@ const TeamChip = styled(Link)`
 `;
 
 const BigNumber = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 2.6rem;
   font-weight: 800;
   line-height: 1;
@@ -238,7 +238,7 @@ const MinuteChip = styled.span`
   border-radius: 8px;
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.72rem;
   font-weight: 800;
   color: var(--text-secondary);

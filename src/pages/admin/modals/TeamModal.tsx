@@ -127,7 +127,7 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {team
             ? t(language, "admin.teams.editTitle")
             : t(language, "admin.teams.addTitle")}

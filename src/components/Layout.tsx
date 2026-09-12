@@ -1,31 +1,18 @@
-import { Drawer, IconButton, Menu, MenuItem } from "@mui/material";
+import { IconButton, Menu, MenuItem } from "@mui/material";
 import { motion } from "framer-motion";
-import {
-  BarChart3,
-  CalendarDays,
-  Home,
-  ListOrdered,
-  LogOut,
-  Menu as MenuIcon,
-  Moon,
-  Radio,
-  Shield,
-  Sun,
-  Trophy,
-  User,
-  Users,
-  X,
-} from "lucide-react";
-import { MouseEvent, useState } from "react";
+import { LogOut, Moon, Radio, Shield, Sun } from "lucide-react";
+import { MouseEvent, useMemo, useState } from "react";
 import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
-import { TranslationKey, t } from "../i18n";
+import { t } from "../i18n";
+import { formatShortDateDot, parseApiDate } from "../utils/dateFormat";
 import { covers } from "../utils/roles";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { logout } from "../store/slices/authSlice";
 import { setLanguage } from "../store/slices/i18nSlice";
 import { toggleTheme } from "../store/slices/themeSlice";
+import DashboardBand from "./DashboardBand";
 import Footer from "./Footer";
 import GlobalSnackbar from "./GlobalSnackbar";
 
@@ -46,84 +33,86 @@ const HeaderInner = styled.div`
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+
+  @media (max-width: 640px) {
+    padding: 10px 16px;
+  }
 `;
 
 const Brand = styled(NavLink)`
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 `;
 
 const BrandMark = styled.div`
-  width: 40px;
-  height: 40px;
-  border-radius: 13px;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--accent), var(--violet));
-  color: #0b0f1a;
-  box-shadow: var(--shadow-card);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+`;
+
+// "Round 15 · 15.09": where the competition is right now, always in view.
+const RoundChip = styled.div`
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--bg-surface);
+  font-family: var(--font-heading);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--accent);
+  white-space: nowrap;
+
+  @media (max-width: 720px) {
+    display: none;
+  }
 `;
 
 const BrandText = styled.div`
   display: flex;
   flex-direction: column;
   line-height: 1.15;
+  min-width: 0;
 
   strong {
-    font-family: "Sora", sans-serif;
-    font-size: 1rem;
+    font-family: var(--font-heading);
+    font-size: 0.98rem;
     font-weight: 800;
     color: var(--text-primary);
-    letter-spacing: 0.02em;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   span {
-    font-size: 0.68rem;
+    font-family: var(--font-heading);
+    font-size: 0.64rem;
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
-    letter-spacing: 0.14em;
-  }
-`;
-
-const Nav = styled.nav`
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: var(--bg-surface);
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 4px;
-
-  @media (max-width: 980px) {
-    display: none;
-  }
-`;
-
-const NavPill = styled(NavLink)`
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  padding: 8px 14px;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition:
-    background 0.15s ease,
-    color 0.15s ease;
-
-  &:hover {
-    color: var(--text-primary);
-    background: var(--bg-surface-hover);
-  }
-
-  &.active {
-    background: var(--accent-soft);
-    color: var(--accent);
+    letter-spacing: 0.16em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 `;
 
@@ -131,6 +120,7 @@ const Actions = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
 `;
 
 const LangToggle = styled.button<{ $active: boolean }>`
@@ -140,7 +130,7 @@ const LangToggle = styled.button<{ $active: boolean }>`
   border-radius: 999px;
   font-size: 0.72rem;
   font-weight: 800;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   letter-spacing: 0.06em;
   background: ${({ $active }) =>
     $active ? "var(--accent)" : "transparent"};
@@ -172,94 +162,25 @@ const RoundIconButton = styled(IconButton)`
   }
 `;
 
-const MobileOnly = styled.div`
-  display: none;
-
-  @media (max-width: 980px) {
-    display: flex;
-  }
-`;
-
-const DesktopOnly = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  @media (max-width: 980px) {
-    display: none;
-  }
-`;
-
-const Main = styled(motion.main)`
+const Main = styled.main`
   max-width: 1200px;
   margin: 0 auto;
-  padding: 28px 24px 0;
+  padding: 24px 24px 0;
   min-height: calc(100vh - 260px);
 
   @media (max-width: 640px) {
-    padding: 20px 16px 0;
+    padding: 18px 16px 0;
   }
 `;
 
-const DrawerBody = styled.div`
-  width: 280px;
-  height: 100%;
-  background: var(--bg-paper-solid);
-  display: flex;
-  flex-direction: column;
-  padding: 18px;
-  gap: 6px;
-`;
+const Page = styled(motion.div)``;
 
-const DrawerHead = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-`;
+// The tab bar belongs to the public area; the secured area has its own frame.
+const isPublicPath = (pathname: string) =>
+  !pathname.startsWith("/admin") && pathname !== "/not-found";
 
-const DrawerLink = styled(NavLink)`
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 14px;
-  border-radius: 14px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  color: var(--text-secondary);
-
-  &.active {
-    background: var(--accent-soft);
-    color: var(--accent);
-  }
-`;
-
-const DrawerFooter = styled.div`
-  margin-top: auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  padding-top: 14px;
-  border-top: 1px solid var(--divider);
-`;
-
-interface NavItem {
-  key: TranslationKey;
-  to: string;
-  icon: typeof Home;
-  end?: boolean;
-}
-
-const NAV_ITEMS: NavItem[] = [
-  { key: "nav.home", to: "/", icon: Home, end: true },
-  { key: "nav.live", to: "/live", icon: Radio },
-  { key: "nav.matches", to: "/matches", icon: CalendarDays },
-  { key: "nav.standings", to: "/standings", icon: ListOrdered },
-  { key: "nav.teams", to: "/teams", icon: Users },
-  { key: "nav.players", to: "/players", icon: User },
-  { key: "nav.stats", to: "/stats", icon: BarChart3 },
-];
+// The five section roots show the season headline; detail pages start lower.
+const SECTION_ROOTS = ["/", "/matches", "/live", "/players", "/teams", "/stats"];
 
 const Layout = () => {
   const dispatch = useAppDispatch();
@@ -268,8 +189,31 @@ const Layout = () => {
   const language = useAppSelector((state) => state.i18n.language);
   const themeMode = useAppSelector((state) => state.theme.mode);
   const { isAuthenticated, user } = useAppSelector((state) => state.auth);
+  const activeSeason = useAppSelector((state) => state.seasons.activeSeason);
+  const matches = useAppSelector((state) => state.matches.matches);
 
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  // The round in play: the next scheduled match, or the last one finished.
+  const currentRound = useMemo(() => {
+    const now = Date.now();
+    const scheduled = matches
+      .filter(
+        (m) =>
+          m.round != null &&
+          m.state !== "FINISHED" &&
+          parseApiDate(m.timestamp).getTime() >= now - 3600000
+      )
+      .sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+    const finished = matches
+      .filter((m) => m.round != null && m.state === "FINISHED")
+      .sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+    const match = scheduled[0] ?? finished[0];
+    if (!match) return null;
+    return {
+      round: match.round as number,
+      date: formatShortDateDot(parseApiDate(match.timestamp)),
+    };
+  }, [matches]);
+
   const [adminAnchor, setAdminAnchor] = useState<null | HTMLElement>(null);
 
   // An operator has no admin panel, so the shield goes straight to the console.
@@ -289,6 +233,9 @@ const Layout = () => {
     navigate("/");
   };
 
+  const publicArea = isPublicPath(location.pathname);
+  const sectionRoot = SECTION_ROOTS.includes(location.pathname);
+
   return (
     <>
       <Header
@@ -298,57 +245,57 @@ const Layout = () => {
       >
         <HeaderInner>
           <Brand to="/">
-            <BrandMark>
-              <Trophy size={20} strokeWidth={2.4} />
-            </BrandMark>
+            <BrandMark>{t(language, "app.shortName")}</BrandMark>
             <BrandText>
-              <strong>{t(language, "app.shortName")}</strong>
-              <span>{t(language, "app.tagline")}</span>
+              <strong>{t(language, "app.brand")}</strong>
+              <span>
+                {activeSeason
+                  ? `${t(language, "app.seasonLabel")} ${activeSeason.name}`
+                  : t(language, "app.tagline")}
+              </span>
             </BrandText>
           </Brand>
 
-          <Nav>
-            {NAV_ITEMS.map(({ key, to, icon: Icon, end }) => (
-              <NavPill key={to} to={to} end={end}>
-                <Icon size={15} />
-                {t(language, key)}
-              </NavPill>
-            ))}
-          </Nav>
-
           <Actions>
-            <DesktopOnly>
-              <LangWrap>
-                {(["ro", "en"] as const).map((lang) => (
-                  <LangToggle
-                    key={lang}
-                    $active={language === lang}
-                    onClick={() => dispatch(setLanguage(lang))}
-                  >
-                    {lang.toUpperCase()}
-                  </LangToggle>
-                ))}
-              </LangWrap>
-              <RoundIconButton onClick={() => dispatch(toggleTheme())}>
-                {themeMode === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-              </RoundIconButton>
-              <RoundIconButton
-                onClick={handleAdminClick}
-                sx={
-                  isAuthenticated
-                    ? { color: "var(--accent) !important" }
-                    : undefined
-                }
-                title={t(language, "nav.admin")}
-              >
-                <Shield size={17} />
-              </RoundIconButton>
-            </DesktopOnly>
-            <MobileOnly>
-              <RoundIconButton onClick={() => setDrawerOpen(true)}>
-                <MenuIcon size={18} />
-              </RoundIconButton>
-            </MobileOnly>
+            {currentRound && (
+              <RoundChip>
+                {t(language, "home.roundShort")} {currentRound.round}
+                <span>·</span>
+                {currentRound.date}
+              </RoundChip>
+            )}
+            <LangWrap>
+              {(["ro", "en"] as const).map((lang) => (
+                <LangToggle
+                  key={lang}
+                  $active={language === lang}
+                  onClick={() => dispatch(setLanguage(lang))}
+                >
+                  {lang.toUpperCase()}
+                </LangToggle>
+              ))}
+            </LangWrap>
+            <RoundIconButton
+              onClick={() => dispatch(toggleTheme())}
+              title={
+                themeMode === "dark"
+                  ? t(language, "nav.lightMode")
+                  : t(language, "nav.darkMode")
+              }
+            >
+              {themeMode === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+            </RoundIconButton>
+            <RoundIconButton
+              onClick={handleAdminClick}
+              sx={
+                isAuthenticated
+                  ? { color: "var(--accent) !important" }
+                  : undefined
+              }
+              title={t(language, "nav.admin")}
+            >
+              <Shield size={17} />
+            </RoundIconButton>
           </Actions>
         </HeaderInner>
       </Header>
@@ -387,89 +334,17 @@ const Layout = () => {
         </MenuItem>
       </Menu>
 
-      <Drawer
-        anchor="right"
-        open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        PaperProps={{ sx: { background: "transparent" } }}
-      >
-        <DrawerBody>
-          <DrawerHead>
-            <BrandText>
-              <strong>{t(language, "app.shortName")}</strong>
-              <span>{t(language, "app.tagline")}</span>
-            </BrandText>
-            <RoundIconButton onClick={() => setDrawerOpen(false)}>
-              <X size={17} />
-            </RoundIconButton>
-          </DrawerHead>
-          {NAV_ITEMS.map(({ key, to, icon: Icon, end }) => (
-            <DrawerLink
-              key={to}
-              to={to}
-              end={end}
-              onClick={() => setDrawerOpen(false)}
-            >
-              <Icon size={17} />
-              {t(language, key)}
-            </DrawerLink>
-          ))}
-          {isAuthenticated && (
-            <DrawerLink
-              to="/admin/live"
-              onClick={() => setDrawerOpen(false)}
-            >
-              <Radio size={17} />
-              {t(language, "nav.console")}
-            </DrawerLink>
-          )}
-          {(!isAuthenticated || canAdminister) && (
-            <DrawerLink
-              to={isAuthenticated ? "/admin" : "/admin/login"}
-              onClick={() => setDrawerOpen(false)}
-            >
-              <Shield size={17} />
-              {t(language, "nav.admin")}
-            </DrawerLink>
-          )}
-          {isAuthenticated && (
-            <DrawerLink
-              to="/"
-              onClick={() => {
-                setDrawerOpen(false);
-                dispatch(logout());
-              }}
-            >
-              <LogOut size={17} />
-              {t(language, "nav.logout")}
-            </DrawerLink>
-          )}
-          <DrawerFooter>
-            <LangWrap>
-              {(["ro", "en"] as const).map((lang) => (
-                <LangToggle
-                  key={lang}
-                  $active={language === lang}
-                  onClick={() => dispatch(setLanguage(lang))}
-                >
-                  {lang.toUpperCase()}
-                </LangToggle>
-              ))}
-            </LangWrap>
-            <RoundIconButton onClick={() => dispatch(toggleTheme())}>
-              {themeMode === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-            </RoundIconButton>
-          </DrawerFooter>
-        </DrawerBody>
-      </Drawer>
+      {publicArea && <DashboardBand showStats={sectionRoot} />}
 
-      <Main
-        key={location.pathname}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.28, ease: "easeOut" }}
-      >
-        <Outlet />
+      <Main>
+        <Page
+          key={location.pathname}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.28, ease: "easeOut" }}
+        >
+          <Outlet />
+        </Page>
       </Main>
       <Footer />
       <GlobalSnackbar />

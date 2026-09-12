@@ -3,6 +3,8 @@ const ro = {
   "app.name": "Campionatul Comunității Studențești",
   "app.shortName": "SCC",
   "app.tagline": "Campionat",
+  "app.brand": "Liga Studențească",
+  "app.seasonLabel": "Sezonul",
 
   // Navigation
   "nav.home": "Acasă",
@@ -14,6 +16,8 @@ const ro = {
   "nav.admin": "Admin",
   "nav.adminPanel": "Panou admin",
   "nav.logout": "Deconectare",
+  "nav.lightMode": "Mod luminos",
+  "nav.darkMode": "Mod întunecat",
 
   // Footer
   "footer.tagline": "Campionatul studenților, totul într-un singur loc",
@@ -21,6 +25,9 @@ const ro = {
   // Common
   "common.viewAll": "Vezi tot",
   "common.goalsShort": "goluri",
+  "common.goals": "Goluri",
+  "common.assistsShort": "pase",
+  "common.playersShort": "jucători",
   "common.search": "Caută...",
   "common.all": "Toate",
   "common.cancel": "Anulează",
@@ -69,6 +76,17 @@ const ro = {
   "home.noResultsHint": "Rezultatele apar după ce se joacă primele meciuri.",
   "home.noStandings": "Niciun clasament încă",
   "home.noScorers": "Niciun gol marcat încă",
+  "home.noAssists": "Nicio pasă decisivă încă",
+  "home.noTeams": "Nicio echipă încă",
+  "home.tabStandings": "Clasament",
+  "home.tabMatches": "Meciuri",
+  "home.tabPlayers": "Jucători",
+  "home.tabTeams": "Echipe",
+  "home.statAvgGoals": "Medie goluri / meci",
+  "home.statCards": "Cartonașe",
+  "home.topScorerLabel": "Golgheter",
+  "home.topAssists": "Pase decisive",
+  "home.roundShort": "Et",
 
   // Standings
   "standings.title": "Clasament",
@@ -85,6 +103,8 @@ const ro = {
   "standings.hdrGoalsAgainst": "GP",
   "standings.hdrPoints": "Pct",
   "standings.hdrForm": "Formă",
+  "standings.hdrDiff": "DG",
+  "standings.legendTop": "Primele trei locuri",
   "standings.ptsShort": "pct",
 
   // Matches

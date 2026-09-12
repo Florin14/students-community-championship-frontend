@@ -40,7 +40,7 @@ const IconWrap = styled.div<{ $color: string }>`
 `;
 
 const Value = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.7rem;
   font-weight: 800;
   color: var(--text-primary);

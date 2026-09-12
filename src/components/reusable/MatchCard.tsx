@@ -55,7 +55,7 @@ const TeamSide = styled.div<{ $align: "left" | "right" }>`
 
 const TeamName = styled.span`
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.92rem;
   color: var(--text-primary);
   overflow: hidden;
@@ -64,7 +64,7 @@ const TeamName = styled.span`
 `;
 
 const Score = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.3rem;
   font-weight: 800;
   color: var(--text-primary);
@@ -75,7 +75,7 @@ const Score = styled.div`
 `;
 
 const Vs = styled.div`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--text-disabled);

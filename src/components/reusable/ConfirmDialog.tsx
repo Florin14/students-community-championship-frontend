@@ -36,7 +36,7 @@ const ConfirmDialog = ({
   onClose,
 }: ConfirmDialogProps) => (
   <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-    <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+    <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
       {title}
     </DialogTitle>
     {(description || children) && (

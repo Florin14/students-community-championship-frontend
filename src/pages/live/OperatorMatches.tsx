@@ -62,7 +62,7 @@ const Side = styled.div<{ $align: "left" | "right" }>`
   flex-direction: ${({ $align }) => ($align === "right" ? "row-reverse" : "row")};
 
   strong {
-    font-family: "Sora", sans-serif;
+    font-family: var(--font-heading);
     font-size: 0.92rem;
     font-weight: 700;
     color: var(--text-primary);
@@ -71,7 +71,7 @@ const Side = styled.div<{ $align: "left" | "right" }>`
 `;
 
 const Score = styled.span`
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 1.25rem;
   font-weight: 800;
   color: var(--text-primary);

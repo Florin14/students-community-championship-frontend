@@ -2,19 +2,19 @@ import { createTheme } from "@mui/material/styles";
 
 export type ThemeMode = "light" | "dark";
 
-const headingFont = '"Sora", "Manrope", system-ui, sans-serif';
-const bodyFont = '"Manrope", "Segoe UI", system-ui, sans-serif';
+const headingFont = '"Chivo", "Space Grotesk", system-ui, sans-serif';
+const bodyFont = '"Space Grotesk", "Segoe UI", system-ui, sans-serif';
 
 export const createAppTheme = (mode: ThemeMode) =>
   createTheme({
     palette: {
       mode,
       primary: {
-        main: mode === "dark" ? "#A3E635" : "#65A30D",
-        contrastText: mode === "dark" ? "#0B0F1A" : "#FFFFFF",
+        main: mode === "dark" ? "#FF6B00" : "#E85F00",
+        contrastText: mode === "dark" ? "#120524" : "#FFFFFF",
       },
       secondary: {
-        main: mode === "dark" ? "#8B5CF6" : "#7C3AED",
+        main: mode === "dark" ? "#8B5CF6" : "#7928CA",
       },
       error: {
         main: mode === "dark" ? "#F87171" : "#DC2626",
@@ -23,19 +23,19 @@ export const createAppTheme = (mode: ThemeMode) =>
         main: mode === "dark" ? "#FBBF24" : "#D97706",
       },
       background: {
-        default: mode === "dark" ? "#0B0F1A" : "#F6F7F3",
-        paper: mode === "dark" ? "#111827" : "#FFFFFF",
+        default: mode === "dark" ? "#120524" : "#FFFFFF",
+        paper: mode === "dark" ? "#1B0F36" : "#FFFFFF",
       },
       text: {
-        primary: mode === "dark" ? "#EDF2F7" : "#101828",
-        secondary: mode === "dark" ? "#93A1B8" : "#51606F",
+        primary: mode === "dark" ? "#EFE8FF" : "#120524",
+        secondary: mode === "dark" ? "#B3A4D4" : "#5A4D76",
       },
       divider:
         mode === "dark"
-          ? "rgba(147, 161, 184, 0.14)"
-          : "rgba(16, 24, 40, 0.1)",
+          ? "rgba(179, 164, 212, 0.14)"
+          : "rgba(18, 5, 36, 0.1)",
     },
-    shape: { borderRadius: 14 },
+    shape: { borderRadius: 12 },
     typography: {
       fontFamily: bodyFont,
       h1: { fontFamily: headingFont, fontWeight: 700 },

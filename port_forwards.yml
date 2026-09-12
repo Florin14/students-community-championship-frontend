@@ -1,0 +1,7 @@
+# Ports published on the host. Separate file because they differ per
+# environment: only the local override includes this one, while a deployed
+# environment sits behind the platform reverse proxy and publishes nothing.
+services:
+  web:
+    ports:
+      - "${WEB_PORT:-3000}:80"

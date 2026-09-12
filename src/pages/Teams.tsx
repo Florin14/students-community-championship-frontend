@@ -6,8 +6,6 @@ import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
-import SeasonSelector from "../components/reusable/SeasonSelector";
-import SectionHeading from "../components/reusable/SectionHeading";
 import StyledTextField from "../components/reusable/StyledTextField";
 import TeamBadge from "../components/reusable/TeamBadge";
 import { t } from "../i18n";
@@ -17,8 +15,10 @@ import { fetchTeams } from "../store/slices/thunks/teamsThunks";
 const Filters = styled.div`
   display: flex;
   align-items: center;
+  justify-content: flex-end;
   gap: 12px;
   flex-wrap: wrap;
+  margin-bottom: 20px;
 `;
 
 const Grid = styled.div`
@@ -80,7 +80,7 @@ const PlayerCount = styled.div`
   color: var(--accent);
   font-size: 0.75rem;
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
 `;
 
 const Teams = () => {
@@ -111,21 +111,14 @@ const Teams = () => {
 
   return (
     <>
-      <SectionHeading
-        title={t(language, "teams.title")}
-        subtitle={t(language, "teams.subtitle")}
-        action={
-          <Filters>
-            <StyledTextField
-              size="small"
-              placeholder={t(language, "common.search")}
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-            />
-            <SeasonSelector />
-          </Filters>
-        }
-      />
+      <Filters>
+        <StyledTextField
+          size="small"
+          placeholder={t(language, "common.search")}
+          value={search}
+          onChange={(event) => setSearch(event.target.value)}
+        />
+      </Filters>
 
       {loading && teams.length === 0 ? (
         <LoadingState />

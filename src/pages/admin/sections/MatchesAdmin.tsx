@@ -142,7 +142,7 @@ const MatchesAdmin = () => {
                   <td style={{ color: "var(--text-secondary)" }}>
                     {match.fieldName ?? "—"}
                   </td>
-                  <td style={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+                  <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
                     {match.scoreHome !== null &&
                     match.scoreHome !== undefined &&
                     match.scoreAway !== null &&

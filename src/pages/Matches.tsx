@@ -7,8 +7,6 @@ import styled from "styled-components";
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
 import MatchCard from "../components/reusable/MatchCard";
-import SeasonSelector from "../components/reusable/SeasonSelector";
-import SectionHeading from "../components/reusable/SectionHeading";
 import StyledSelect from "../components/reusable/StyledSelect";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -41,7 +39,7 @@ const TabPill = styled.button<{ $active: boolean }>`
   cursor: pointer;
   padding: 8px 16px;
   border-radius: 999px;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   font-size: 0.82rem;
   font-weight: 700;
   background: ${({ $active }) =>
@@ -76,7 +74,7 @@ const RoundHeader = styled.div`
 const RoundCount = styled.span`
   font-size: 0.72rem;
   font-weight: 700;
-  font-family: "Sora", sans-serif;
+  font-family: var(--font-heading);
   padding: 3px 10px;
   border-radius: 999px;
   background: var(--violet-soft);
@@ -161,12 +159,6 @@ const Matches = () => {
 
   return (
     <>
-      <SectionHeading
-        title={t(language, "matches.title")}
-        subtitle={t(language, "matches.subtitle")}
-        action={<SeasonSelector />}
-      />
-
       <FilterBar>
         <Tabs>
           {tabs.map(({ key, label }) => (

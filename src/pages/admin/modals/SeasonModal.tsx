@@ -90,7 +90,7 @@ const SeasonModal = ({ open, season, onClose }: SeasonModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {season
             ? t(language, "admin.seasons.editTitle")
             : t(language, "admin.seasons.addTitle")}

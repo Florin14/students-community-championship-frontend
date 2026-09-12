@@ -29,7 +29,7 @@ const StatusPill = ({ active, label }: { active: boolean; label: string }) => (
       display: "inline-block",
       padding: "3px 9px",
       borderRadius: 999,
-      fontFamily: '"Sora", sans-serif',
+      fontFamily: 'var(--font-heading)',
       fontSize: "0.7rem",
       fontWeight: 700,
       background: active ? "var(--accent-soft)" : "var(--bg-surface)",

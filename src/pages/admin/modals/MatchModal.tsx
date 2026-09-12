@@ -132,7 +132,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
   return (
     <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
       <form onSubmit={handleSubmit}>
-        <DialogTitle sx={{ fontFamily: '"Sora", sans-serif', fontWeight: 700 }}>
+        <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {match
             ? t(language, "admin.matches.editTitle")
             : t(language, "admin.matches.addTitle")}
