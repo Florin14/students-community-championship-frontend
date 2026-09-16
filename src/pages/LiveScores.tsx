@@ -1,18 +1,15 @@
-import { Radio } from "lucide-react";
+import { Radio, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
+import MatchClockLabel from "../components/reusable/MatchClockLabel";
 import MatchTimeline from "../components/reusable/MatchTimeline";
 import TeamBadge from "../components/reusable/TeamBadge";
-import { usePolling } from "../hooks/usePolling";
+import { useLiveFeed } from "../hooks/useLiveFeed";
 import { t } from "../i18n";
-import { useAppDispatch, useAppSelector } from "../store/hooks";
-import { fetchLiveMatches } from "../store/slices/thunks/liveThunks";
-
-/** How often the public pages ask for the live feed. */
-export const LIVE_POLL_MS = 10000;
+import { useAppSelector } from "../store/hooks";
 
 const Grid = styled.div`
   display: flex;
@@ -75,7 +72,26 @@ const Score = styled.span`
   white-space: nowrap;
 `;
 
+const StreamMark = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+
+  @media (max-width: 480px) {
+    span {
+      display: none;
+    }
+  }
+`;
+
 const Clock = styled.span`
+  font-variant-numeric: tabular-nums;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -92,18 +108,15 @@ const Clock = styled.span`
 `;
 
 /**
- * Public live scores. Polls the single live endpoint and repaints only when the
- * feed's revision changes, so an idle afternoon costs one cheap request every
- * ten seconds and no re-renders.
+ * Public live scores. Subscribes to the live feed - pushed by the live service,
+ * polled when that is unavailable - and repaints only when the feed's revision
+ * changes, so an idle afternoon costs nothing and no re-renders.
  */
 const LiveScores = () => {
-  const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
-  const { matches, ready } = useAppSelector((state) => state.live);
+  const { matches, ready, receivedAt } = useAppSelector((state) => state.live);
 
-  usePolling(() => void dispatch(fetchLiveMatches()), {
-    intervalMs: LIVE_POLL_MS,
-  });
+  useLiveFeed();
 
   if (!ready) return <LoadingState />;
 
@@ -135,12 +148,18 @@ const LiveScores = () => {
                     {match.scoreHome ?? 0} : {match.scoreAway ?? 0}
                   </Score>
                   <Clock>
-                    {match.state === "HALF_TIME"
-                      ? t(language, "live.halfTime")
-                      : t(language, "live.minuteShort", {
-                          minute: match.currentMinute ?? 1,
-                        })}
+                    <MatchClockLabel
+                      match={match}
+                      receivedAt={receivedAt}
+                      language={language}
+                    />
                   </Clock>
+                  {match.streamUrl && (
+                    <StreamMark>
+                      <Tv size={13} />
+                      <span>{t(language, "live.streamAvailable")}</span>
+                    </StreamMark>
+                  )}
                 </Middle>
                 <Side $align="right">
                   <TeamBadge

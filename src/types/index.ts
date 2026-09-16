@@ -174,6 +174,8 @@ export interface Match {
   fieldId?: number | null;
   fieldName?: string | null;
   location?: string | null;
+  /** Public stream link (YouTube or any http(s) URL) shown on the match page. */
+  streamUrl?: string | null;
   scoreHome?: number | null;
   scoreAway?: number | null;
   state: MatchState;
@@ -182,6 +184,11 @@ export interface Match {
   isClockRunning: boolean;
   /** Server-side minute at the time of the response; the client ticks on from here. */
   currentMinute?: number | null;
+  /**
+   * Playing time in seconds when the response was built, running segment
+   * included. Optional so an older API without it still renders (treated as 0).
+   */
+  playedSeconds?: number;
   /** A confirmed result. Writes are refused until a super-admin reopens it. */
   isLocked: boolean;
 }
@@ -218,6 +225,7 @@ export interface MatchPayload {
   timestamp: string;
   fieldId?: number | null;
   location?: string | null;
+  streamUrl?: string | null;
   operatorIds?: number[];
 }
 
@@ -228,6 +236,8 @@ export interface MatchUpdatePayload {
   timestamp?: string;
   fieldId?: number | null;
   location?: string | null;
+  /** null clears the link. */
+  streamUrl?: string | null;
   state?: MatchState;
 }
 

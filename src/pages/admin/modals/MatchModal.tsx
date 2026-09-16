@@ -22,6 +22,7 @@ import {
 } from "../../../store/slices/thunks/matchesThunks";
 import type { Match, MatchState } from "../../../types";
 import { parseApiDate, toInputDateTimeLocal } from "../../../utils/dateFormat";
+import { isValidStreamUrl } from "../../../utils/streamUrl";
 import { FieldGrid, FullRow } from "../adminUi";
 
 // A finished match is only ever moved by the console (finish / reopen), so the
@@ -49,6 +50,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
   const [timestamp, setTimestamp] = useState("");
   const [fieldId, setFieldId] = useState<number | "">("");
   const [location, setLocation] = useState("");
+  const [streamUrl, setStreamUrl] = useState("");
   const [state, setState] = useState<MatchState>("SCHEDULED");
   const [saving, setSaving] = useState(false);
 
@@ -63,13 +65,19 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
       );
       setFieldId(match?.fieldId ?? "");
       setLocation(match?.location ?? "");
+      setStreamUrl(match?.streamUrl ?? "");
       setState(match?.state === "FINISHED" ? "SCHEDULED" : match?.state ?? "SCHEDULED");
     }
   }, [open, match, seasonId]);
 
+  const trimmedStreamUrl = streamUrl.trim();
+  const streamUrlInvalid =
+    trimmedStreamUrl.length > 0 && !isValidStreamUrl(trimmedStreamUrl);
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (formSeasonId === "" || homeTeamId === "" || awayTeamId === "") return;
+    if (streamUrlInvalid) return;
     setSaving(true);
 
     const common = {
@@ -77,6 +85,8 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
       timestamp,
       fieldId: fieldId === "" ? null : fieldId,
       location: location || null,
+      // null clears a link that was set before; the API keeps an omitted field.
+      streamUrl: trimmedStreamUrl || null,
     };
 
     const action = match
@@ -256,6 +266,23 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               onChange={(event) => setLocation(event.target.value)}
               fullWidth
             />
+            <FullRow>
+              <StyledTextField
+                label={t(language, "admin.matches.streamUrl")}
+                type="url"
+                value={streamUrl}
+                onChange={(event) => setStreamUrl(event.target.value)}
+                fullWidth
+                placeholder="https://www.youtube.com/watch?v=..."
+                inputProps={{ maxLength: 500 }}
+                error={streamUrlInvalid}
+                helperText={
+                  streamUrlInvalid
+                    ? t(language, "admin.matches.streamUrlInvalid")
+                    : t(language, "admin.matches.streamUrlHint")
+                }
+              />
+            </FullRow>
             {match && match.state !== "FINISHED" && (
               <FullRow>
                 <FormControl fullWidth>
@@ -292,7 +319,8 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               formSeasonId === "" ||
               homeTeamId === "" ||
               awayTeamId === "" ||
-              !timestamp
+              !timestamp ||
+              streamUrlInvalid
             }
           >
             {t(language, "common.save")}

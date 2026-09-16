@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
 import type { Match, MatchDetails } from "../../types";
 import {
@@ -13,6 +13,8 @@ import {
 interface MatchesState {
   matches: Match[];
   selectedMatch: MatchDetails | null;
+  /** Wall-clock ms when `selectedMatch` last came from the server. */
+  selectedMatchReceivedAt: number;
   loading: boolean;
   error: string | null;
 }
@@ -20,6 +22,7 @@ interface MatchesState {
 const initialState: MatchesState = {
   matches: [],
   selectedMatch: null,
+  selectedMatchReceivedAt: 0,
   loading: false,
   error: null,
 };
@@ -54,6 +57,21 @@ const matchesSlice = createSlice({
     clearSelectedMatch: (state) => {
       state.selectedMatch = null;
     },
+    /**
+     * The match pushed by the live service while its page is open. Ignored when
+     * the reader has already moved to another match, so a late frame from the
+     * previous socket cannot overwrite the page they are looking at now.
+     */
+    matchReceived: (state, action: PayloadAction<MatchDetails>) => {
+      if (
+        state.selectedMatch === null ||
+        state.selectedMatch.id === action.payload.id
+      ) {
+        state.loading = false;
+        state.selectedMatch = action.payload;
+        state.selectedMatchReceivedAt = Date.now();
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -69,6 +87,7 @@ const matchesSlice = createSlice({
       .addCase(fetchMatchById.fulfilled, (state, action) => {
         state.loading = false;
         state.selectedMatch = action.payload;
+        state.selectedMatchReceivedAt = Date.now();
       })
       .addCase(fetchMatchById.rejected, (state, action) => {
         setError(state, action.payload, "Failed to fetch match");
@@ -80,11 +99,13 @@ const matchesSlice = createSlice({
         upsertMatch(state, action.payload);
         if (state.selectedMatch?.id === action.payload.id) {
           state.selectedMatch = { ...state.selectedMatch, ...action.payload };
+          state.selectedMatchReceivedAt = Date.now();
         }
       })
       .addCase(setMatchOperatorsThunk.fulfilled, (state, action) => {
         upsertMatch(state, action.payload);
         state.selectedMatch = action.payload;
+        state.selectedMatchReceivedAt = Date.now();
       })
       .addCase(deleteMatchThunk.fulfilled, (state, action) => {
         state.matches = state.matches.filter((m) => m.id !== action.payload);
@@ -95,5 +116,5 @@ const matchesSlice = createSlice({
   },
 });
 
-export const { clearSelectedMatch } = matchesSlice.actions;
+export const { clearSelectedMatch, matchReceived } = matchesSlice.actions;
 export default matchesSlice.reducer;

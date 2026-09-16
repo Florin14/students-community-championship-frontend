@@ -7,6 +7,8 @@
  */
 interface SccRuntimeConfig {
   API_URL?: string;
+  /** Live websocket service. Empty string = no live service, poll instead. */
+  LIVE_URL?: string;
   ENV?: string;
   APP_VERSION?: string;
   GIT_SHA?: string;

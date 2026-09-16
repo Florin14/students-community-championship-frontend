@@ -14,6 +14,9 @@ const baseURL =
   (envUrl && envUrl.length > 0 ? envUrl : undefined) ??
   "http://localhost:8000/";
 
+/** The API origin every other client (the live websocket) derives from. */
+export const API_BASE_URL = baseURL;
+
 const api = axios.create({
   baseURL,
   timeout: 15000,

@@ -14,10 +14,11 @@ cat > "$CONFIG_FILE" <<EOF
 // Generated at container start - do not edit, every restart overwrites it.
 window.__SCC_CONFIG__ = {
   "API_URL": "${API_URL:-}",
+  "LIVE_URL": "${LIVE_URL:-}",
   "ENV": "${ENV:-local}",
   "APP_VERSION": "${APP_VERSION:-dev}",
   "GIT_SHA": "${GIT_SHA:-dev}"
 };
 EOF
 
-echo "[runtime-config] API_URL=${API_URL:-<empty>} ENV=${ENV:-local}"
+echo "[runtime-config] API_URL=${API_URL:-<empty>} LIVE_URL=${LIVE_URL:-<empty, same as API_URL>} ENV=${ENV:-local}"

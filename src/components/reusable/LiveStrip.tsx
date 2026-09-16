@@ -1,15 +1,12 @@
-import { ArrowRight, Radio } from "lucide-react";
+import { ArrowRight, Radio, Tv } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
-import { usePolling } from "../../hooks/usePolling";
+import { useLiveFeed } from "../../hooks/useLiveFeed";
 import { t } from "../../i18n";
-import { useAppDispatch, useAppSelector } from "../../store/hooks";
-import { fetchLiveMatches } from "../../store/slices/thunks/liveThunks";
+import { useAppSelector } from "../../store/hooks";
 import TeamBadge from "./TeamBadge";
-
-/** Matches the poll interval used by the dedicated live page. */
-const POLL_MS = 10000;
+import MatchClockLabel from "./MatchClockLabel";
 
 const Wrap = styled.section`
   display: flex;
@@ -98,29 +95,34 @@ const Goals = styled.strong`
 `;
 
 const Minute = styled.small`
+  font-variant-numeric: tabular-nums;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-size: 0.74rem;
   font-weight: 700;
   color: var(--danger);
   text-transform: uppercase;
   letter-spacing: 0.05em;
+
+  svg {
+    color: var(--text-secondary);
+  }
 `;
 
 /**
  * The live band on the home page.
  *
  * Renders nothing when no match is in progress, so the page is not padded with
- * an empty placeholder for most of the week. It polls the same single live
- * endpoint as the live page and shares its slice, so having both mounted costs
- * one request per interval.
+ * an empty placeholder for most of the week. It shares the live feed (and its
+ * slice) with the live page, so having both mounted costs one subscription.
  */
 const LiveStrip = () => {
-  const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const matches = useAppSelector((state) => state.live.matches);
+  const receivedAt = useAppSelector((state) => state.live.receivedAt);
 
-  usePolling(() => void dispatch(fetchLiveMatches()), {
-    intervalMs: POLL_MS,
-  });
+  useLiveFeed();
 
   if (matches.length === 0) return null;
 
@@ -167,11 +169,14 @@ const LiveStrip = () => {
               <Goals>{match.scoreAway ?? 0}</Goals>
             </Row>
             <Minute>
-              {match.state === "HALF_TIME"
-                ? t(language, "live.halfTime")
-                : t(language, "live.minuteShort", {
-                    minute: match.currentMinute ?? 1,
-                  })}
+              <MatchClockLabel
+                match={match}
+                receivedAt={receivedAt}
+                language={language}
+              />
+              {match.streamUrl && (
+                <Tv size={13} aria-label={t(language, "live.streamAvailable")} />
+              )}
             </Minute>
           </Tile>
         ))}
