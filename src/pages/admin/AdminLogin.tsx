@@ -69,12 +69,12 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const from =
-    (location.state as { from?: { pathname: string } } | null)?.from
-      ?.pathname ?? "/admin";
+    (location.state as { from?: { pathname: string; search?: string; hash?: string } } | null)?.from;
+  const destination = from ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}` : "/admin";
 
   useEffect(() => {
-    if (isAuthenticated) navigate(from, { replace: true });
-  }, [isAuthenticated, navigate, from]);
+    if (isAuthenticated) navigate(destination, { replace: true });
+  }, [isAuthenticated, navigate, destination]);
 
   useEffect(() => {
     return () => {

@@ -2,6 +2,7 @@ import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
 import api from "../../../api/config";
+import { extractPlayerQrToken } from "../../../utils/playerQr";
 import type { TranslationKey } from "../../../i18n";
 import type { AttendancePreview, AttendanceRecord, AttendanceStatistics, MatchAttendance, PlayerQr } from "../../../types/attendance";
 
@@ -28,14 +29,18 @@ export const fetchMatchAttendance = createAsyncThunk<MatchAttendance, number, { 
 
 export const scanPlayerQr = createAsyncThunk<AttendancePreview, { matchId: number; token: string }, { rejectValue: TranslationKey }>(
   "attendance/scan", async ({ matchId, token }, thunkAPI) => {
-    try { return (await api.post<AttendancePreview>(`/attendance/matches/${matchId}/scan`, { token }, { signal: thunkAPI.signal })).data; }
+    const credential = extractPlayerQrToken(token);
+    if (!credential) return thunkAPI.rejectWithValue("attendance.errorQR");
+    try { return (await api.post<AttendancePreview>(`/attendance/matches/${matchId}/scan`, { token: credential }, { signal: thunkAPI.signal })).data; }
     catch (error) { return thunkAPI.rejectWithValue(errorKey(error)); }
   }
 );
 
 export const confirmPlayerAttendance = createAsyncThunk<{ attendance: AttendanceRecord; alreadyPresent: boolean }, { matchId: number; token: string; identityConfirmed: boolean }, { rejectValue: TranslationKey }>(
   "attendance/confirm", async ({ matchId, token, identityConfirmed }, thunkAPI) => {
-    try { return (await api.post(`/attendance/matches/${matchId}/confirm`, { token, identityConfirmed })).data; }
+    const credential = extractPlayerQrToken(token);
+    if (!credential) return thunkAPI.rejectWithValue("attendance.errorQR");
+    try { return (await api.post(`/attendance/matches/${matchId}/confirm`, { token: credential, identityConfirmed })).data; }
     catch (error) { return thunkAPI.rejectWithValue(errorKey(error)); }
   }
 );

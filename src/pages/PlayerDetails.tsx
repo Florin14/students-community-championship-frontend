@@ -1,7 +1,8 @@
+import { Alert, Button } from "@mui/material";
 import { motion } from "framer-motion";
 import { ArrowLeft, Goal, History, User, Zap } from "lucide-react";
 import { useEffect } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
@@ -17,6 +18,7 @@ import {
 import type { PlayerEventType } from "../types";
 import { formatDateDot, parseApiDate } from "../utils/dateFormat";
 import { imageSrc } from "../utils/images";
+import { readPlayerQrHash } from "../utils/playerQr";
 
 const BackLink = styled(Link)`
   display: inline-flex;
@@ -256,6 +258,8 @@ const initialsOf = (name: string) =>
 
 const PlayerDetails = () => {
   const { id } = useParams();
+  const location = useLocation();
+  const qrLink = readPlayerQrHash(location.hash);
   const playerId = Number(id);
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
@@ -339,6 +343,15 @@ const PlayerDetails = () => {
           )}
         <SeasonSelector minWidth={180} />
       </HeaderCard>
+
+      {qrLink && (
+        <Alert severity="info" sx={{ mb: 3 }}>
+          <p>{t(language, "attendance.qrProfileHint")}</p>
+          <Button component={Link} to={`/admin/attendance${location.hash}`} variant="contained" sx={{ mt: 1 }}>
+            {t(language, "attendance.checkMatch")}
+          </Button>
+        </Alert>
+      )}
 
       <StatsGrid>
         <StatCard
