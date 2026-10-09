@@ -13,14 +13,16 @@ import type { MatchEvent } from "../../types";
  * entries too.
  */
 
-const Card = styled.div`
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+const Card = styled.div<{ $embedded: boolean }>`
+  width: 100%;
+  min-width: 0;
+  background: ${({ $embedded }) => $embedded ? "transparent" : "var(--bg-card)"};
+  border: ${({ $embedded }) => $embedded ? "none" : "1px solid var(--border)"};
   border-radius: 18px;
   overflow: hidden;
 `;
 
-const Row = styled.div<{ $away: boolean }>`
+const Row = styled.div<{ $away: boolean; $embedded: boolean }>`
   display: grid;
   grid-template-columns: 46px 1fr;
   align-items: start;
@@ -38,6 +40,18 @@ const Row = styled.div<{ $away: boolean }>`
   > * {
     direction: ltr;
   }
+
+  ${({ $embedded }) => $embedded && `
+    padding: 10px 0;
+    gap: 8px;
+    @media (max-width: 640px) {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      justify-items: start;
+      direction: ltr;
+      text-align: left;
+    }
+  `}
 `;
 
 const Minute = styled.span`
@@ -56,7 +70,7 @@ const Minute = styled.span`
   font-variant-numeric: tabular-nums;
 `;
 
-const Info = styled.div<{ $away: boolean }>`
+const Info = styled.div<{ $away: boolean; $embedded: boolean }>`
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -78,6 +92,13 @@ const Info = styled.div<{ $away: boolean }>`
     color: var(--text-secondary);
     overflow-wrap: anywhere;
   }
+  ${({ $embedded }) => $embedded && `
+    @media (max-width: 640px) {
+      align-items: flex-start;
+      strong { font-size: 0.82rem; flex-wrap: wrap; }
+      small { font-size: 0.72rem; }
+    }
+  `}
 `;
 
 const CardMark = styled.span<{ $red: boolean }>`
@@ -100,6 +121,7 @@ interface MatchTimelineProps {
   homeTeamId: number;
   language: Language;
   emptyLabel?: string;
+  embedded?: boolean;
 }
 
 const MatchTimeline = ({
@@ -107,10 +129,11 @@ const MatchTimeline = ({
   homeTeamId,
   language,
   emptyLabel,
+  embedded = false,
 }: MatchTimelineProps) => {
   if (events.length === 0) {
     return (
-      <Card>
+      <Card $embedded={embedded}>
         <Empty>{emptyLabel ?? t(language, "matchDetails.noEvents")}</Empty>
       </Card>
     );
@@ -124,7 +147,7 @@ const MatchTimeline = ({
   });
 
   return (
-    <Card>
+    <Card $embedded={embedded}>
       {ordered.map((event) => {
         const away = event.teamId !== homeTeamId;
         const isGoal = event.type === "GOAL" || event.type === "OWN_GOAL";
@@ -132,13 +155,13 @@ const MatchTimeline = ({
           event.type === "YELLOW_CARD" || event.type === "RED_CARD";
 
         return (
-          <Row key={event.id} $away={away}>
+          <Row key={event.id} $away={away} $embedded={embedded}>
             <Minute>
               {event.minute !== null && event.minute !== undefined
                 ? `${event.minute}′`
                 : "—"}
             </Minute>
-            <Info $away={away}>
+            <Info $away={away} $embedded={embedded}>
               <strong>
                 {isGoal && (
                   <GoalIcon

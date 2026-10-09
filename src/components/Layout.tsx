@@ -15,6 +15,7 @@ import { toggleTheme } from "../store/slices/themeSlice";
 import DashboardBand from "./DashboardBand";
 import Footer from "./Footer";
 import GlobalSnackbar from "./GlobalSnackbar";
+import LiveMatchReminder from "./LiveMatchReminder";
 
 const Header = styled(motion.header)`
   position: sticky;
@@ -308,7 +309,7 @@ const Layout = () => {
         <MenuItem disabled sx={{ fontSize: "0.8rem", opacity: 0.8 }}>
           {user?.name}
         </MenuItem>
-        <MenuItem
+        {covers(user?.role, "OPERATOR") && <MenuItem
           onClick={() => {
             setAdminAnchor(null);
             navigate("/admin/live");
@@ -316,6 +317,14 @@ const Layout = () => {
         >
           <Radio size={15} style={{ marginRight: 8 }} />
           {t(language, "nav.console")}
+        </MenuItem>}
+        <MenuItem
+          onClick={() => {
+            setAdminAnchor(null);
+            navigate("/admin/attendance");
+          }}
+        >
+          {t(language, "attendance.title")}
         </MenuItem>
         {canAdminister && (
           <MenuItem
@@ -337,6 +346,9 @@ const Layout = () => {
       {publicArea && <DashboardBand showStats={sectionRoot} />}
 
       <Main>
+        {isAuthenticated && user && covers(user.role, "OPERATOR") && (
+          <LiveMatchReminder key={user.id} userId={user.id} />
+        )}
         <Page
           key={location.pathname}
           initial={{ opacity: 0, y: 10 }}

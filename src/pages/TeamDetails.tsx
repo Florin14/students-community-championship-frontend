@@ -9,6 +9,7 @@ import FormPills from "../components/reusable/FormPills";
 import MatchCard from "../components/reusable/MatchCard";
 import SectionHeading from "../components/reusable/SectionHeading";
 import TeamBadge from "../components/reusable/TeamBadge";
+import type { PlayerPosition } from "../types";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchMatches } from "../store/slices/thunks/matchesThunks";
@@ -108,7 +109,7 @@ const StatChip = styled.div`
 
 const Columns = styled.div`
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   gap: 24px;
   align-items: start;
 
@@ -118,6 +119,7 @@ const Columns = styled.div`
 `;
 
 const RosterCard = styled.div`
+  min-width: 0;
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -164,9 +166,18 @@ const PlayerName = styled.span`
   white-space: nowrap;
 `;
 
-const PositionTag = styled.span`
-  font-size: 0.72rem;
-  color: var(--text-disabled);
+const PositionGroup = styled.section`
+  & + & { margin-top: 20px; }
+  h3 {
+    font-family: var(--font-heading);
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0 10px 8px;
+    border-bottom: 1px solid var(--divider);
+    margin-bottom: 6px;
+  }
 `;
 
 const GoalsCount = styled.span`
@@ -181,6 +192,10 @@ const MatchList = styled.div`
   flex-direction: column;
   gap: 12px;
 `;
+
+const POSITIONS: (PlayerPosition | null)[] = [
+  "GOALKEEPER", "DEFENDER", "MIDFIELDER", "FORWARD", null,
+];
 
 const TeamDetails = () => {
   const { id } = useParams();
@@ -221,6 +236,11 @@ const TeamDetails = () => {
         .sort((a, b) => (a.shirtNumber ?? 999) - (b.shirtNumber ?? 999)),
     [players, teamId]
   );
+
+  const rosterGroups = POSITIONS.map((position) => ({
+    position,
+    players: roster.filter((player) => (player.position ?? null) === position),
+  })).filter((group) => group.players.length > 0);
 
   const teamMatches = useMemo(
     () =>
@@ -269,6 +289,9 @@ const TeamDetails = () => {
         />
         <HeaderInfo>
           <TeamName>{selectedTeam.name}</TeamName>
+          {selectedTeam.university && (
+            <Faculty><GraduationCap size={15} />{selectedTeam.university}</Faculty>
+          )}
           {selectedTeam.faculty && (
             <Faculty>
               <GraduationCap size={15} />
@@ -316,7 +339,10 @@ const TeamDetails = () => {
               title={t(language, "teamDetails.noPlayers")}
             />
           ) : (
-            roster.map((player) => (
+            rosterGroups.map((group) => (
+              <PositionGroup key={group.position ?? "unspecified"}>
+                <h3>{t(language, `positionGroup.${group.position ?? "UNSPECIFIED"}`)}</h3>
+                {group.players.map((player) => (
               <RosterRow key={player.id} to={`/players/${player.id}`}>
                 <ShirtNumber>
                   {player.shirtNumber !== null &&
@@ -326,27 +352,18 @@ const TeamDetails = () => {
                 </ShirtNumber>
                 <PlayerName>
                   {player.name}
-                  {player.position && (
-                    <>
-                      {" "}
-                      <PositionTag>
-                        {t(
-                          language,
-                          ("position." + player.position) as never
-                        )}
-                      </PositionTag>
-                    </>
-                  )}
                 </PlayerName>
                 <GoalsCount>
                   {player.goals} {t(language, "common.goalsShort")}
                 </GoalsCount>
               </RosterRow>
+                ))}
+              </PositionGroup>
             ))
           )}
         </RosterCard>
 
-        <div>
+        <RosterCard>
           <SectionHeading title={t(language, "teamDetails.matches")} />
           {teamMatches.length === 0 ? (
             <EmptyState
@@ -360,7 +377,7 @@ const TeamDetails = () => {
               ))}
             </MatchList>
           )}
-        </div>
+        </RosterCard>
       </Columns>
     </>
   );

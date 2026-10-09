@@ -7,6 +7,7 @@ import {
   type QueuedEvent,
 } from "../../utils/eventQueue";
 import {
+  fetchMatchReminders,
   fetchMyMatches,
   fetchScoringEvents,
   fetchScoringMatch,
@@ -16,29 +17,42 @@ import {
   resumeMatchThunk,
   startMatchThunk,
   submitEvent,
+  updateAudienceThunk,
   undoLastEvent,
   voidEvent,
 } from "./thunks/liveScoringThunks";
+import { logout } from "./authSlice";
+import { loginThunk } from "./thunks/authThunks";
 
 interface LiveScoringState {
   myMatches: Match[];
+  reminderMatches: Match[];
+  reminderRequestId: string | null;
   match: MatchDetails | null;
+  clockSyncedAt: number | null;
+  scoringRequestId: string | null;
   events: MatchEvent[];
   /** Actions the server has not acknowledged yet. Mirrored to localStorage. */
   queue: QueuedEvent[];
   loading: boolean;
   /** A lifecycle action is in flight; the console disables its controls. */
   busy: boolean;
+  audienceSaving: boolean;
   error: string | null;
 }
 
 const initialState: LiveScoringState = {
   myMatches: [],
+  reminderMatches: [],
+  reminderRequestId: null,
   match: null,
+  clockSyncedAt: null,
+  scoringRequestId: null,
   events: [],
   queue: readQueue(),
   loading: false,
   busy: false,
+  audienceSaving: false,
   error: null,
 };
 
@@ -63,19 +77,28 @@ const applyScore = (
   currentMinute?: number | null
 ) => {
   if (!state.match) return;
+  state.scoringRequestId = null;
+  state.loading = false;
   if (scoreHome !== undefined) state.match.scoreHome = scoreHome;
   if (scoreAway !== undefined) state.match.scoreAway = scoreAway;
   if (currentMinute !== undefined && currentMinute !== null) {
     state.match.currentMinute = currentMinute;
+    state.clockSyncedAt = Date.now();
   }
 };
 
 const applyMatch = (state: LiveScoringState, match: MatchDetails) => {
+  state.loading = false;
   state.match = match;
+  state.clockSyncedAt = Date.now();
   state.events = match.events ?? state.events;
   const index = state.myMatches.findIndex((item) => item.id === match.id);
   if (index >= 0) {
     state.myMatches[index] = { ...state.myMatches[index], ...match };
+  }
+  const reminderIndex = state.reminderMatches.findIndex((item) => item.id === match.id);
+  if (reminderIndex >= 0) {
+    state.reminderMatches[reminderIndex] = { ...state.reminderMatches[reminderIndex], ...match };
   }
 };
 
@@ -123,12 +146,59 @@ const liveScoringSlice = createSlice({
     },
     resetScoring: (state) => {
       state.match = null;
+      state.clockSyncedAt = null;
+      state.loading = false;
+      state.scoringRequestId = null;
       state.events = [];
       state.error = null;
       state.busy = false;
+      state.audienceSaving = false;
     },
   },
   extraReducers: (builder) => {
+    builder
+      .addCase(fetchMatchReminders.pending, (state, action) => {
+        state.reminderRequestId = action.meta.requestId;
+      })
+      .addCase(fetchMatchReminders.fulfilled, (state, action) => {
+        if (state.reminderRequestId !== action.meta.requestId) return;
+        state.reminderRequestId = null;
+        state.reminderMatches = action.payload;
+      })
+      .addCase(fetchMatchReminders.rejected, (state, action) => {
+        if (state.reminderRequestId !== action.meta.requestId) return;
+        state.reminderRequestId = null;
+        if (!action.meta.aborted) state.reminderMatches = [];
+      })
+      .addCase(logout, (state) => {
+        state.reminderMatches = [];
+        state.reminderRequestId = null;
+      })
+      .addCase(loginThunk.fulfilled, (state) => {
+        state.reminderMatches = [];
+        state.reminderRequestId = null;
+      });
+    builder
+      .addCase(updateAudienceThunk.pending, (state, action) => {
+        if (state.match?.id !== action.meta.arg.matchId) return;
+        state.audienceSaving = true;
+        state.error = null;
+      })
+      .addCase(updateAudienceThunk.fulfilled, (state, action) => {
+        if (state.match?.id !== action.payload.matchId) return;
+        state.audienceSaving = false;
+        state.scoringRequestId = null;
+        state.loading = false;
+        // This response changes metadata only: keep newer score/clock events.
+        state.match.audience = action.payload.audience;
+        const item = state.myMatches.find((match) => match.id === action.payload.matchId);
+        if (item) item.audience = action.payload.audience;
+      })
+      .addCase(updateAudienceThunk.rejected, (state, action) => {
+        if (state.match?.id !== action.meta.arg.matchId) return;
+        state.audienceSaving = false;
+        state.error = action.payload ?? "Failed to save audience";
+      });
     builder
       .addCase(fetchMyMatches.pending, (state) => {
         state.loading = true;
@@ -143,15 +213,20 @@ const liveScoringSlice = createSlice({
         state.error = action.payload ?? "Failed to load your matches";
       })
 
-      .addCase(fetchScoringMatch.pending, (state) => {
+      .addCase(fetchScoringMatch.pending, (state, action) => {
+        state.scoringRequestId = action.meta.requestId;
         state.loading = true;
         state.error = null;
       })
       .addCase(fetchScoringMatch.fulfilled, (state, action) => {
+        if (state.scoringRequestId !== action.meta.requestId) return;
+        state.scoringRequestId = null;
         state.loading = false;
         applyMatch(state, action.payload);
       })
       .addCase(fetchScoringMatch.rejected, (state, action) => {
+        if (state.scoringRequestId !== action.meta.requestId) return;
+        state.scoringRequestId = null;
         state.loading = false;
         state.error = action.payload ?? "Failed to load the match";
       })
@@ -237,6 +312,9 @@ const liveScoringSlice = createSlice({
         .addCase(thunk.fulfilled, (state, action) => {
           state.busy = false;
           applyMatch(state, action.payload);
+          state.scoringRequestId = null;
+          // Ignore a poll begun before this action changed the clock state.
+          state.reminderRequestId = null;
         })
         .addCase(thunk.rejected, (state, action) => {
           state.busy = false;

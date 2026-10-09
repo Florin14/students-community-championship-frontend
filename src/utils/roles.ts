@@ -15,7 +15,7 @@ export const covers = (
   required: PlatformRole
 ): boolean => {
   if (!role) return false;
-  return (LEVELS[role] ?? 0) >= LEVELS[required];
+  return LEVELS[role] !== undefined && LEVELS[role] >= LEVELS[required];
 };
 
 export const isOperatorOnly = (role: PlatformRole | null | undefined): boolean =>

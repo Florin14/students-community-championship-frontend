@@ -342,6 +342,12 @@ const PlayerDetails = () => {
 
       <StatsGrid>
         <StatCard
+          icon={User}
+          value={selectedPlayer.attendanceCount ?? 0}
+          label={t(language, "attendance.presences")}
+          tone="accent"
+        />
+        <StatCard
           icon={Goal}
           value={selectedPlayer.goals}
           label={t(language, "playerDetails.goals")}

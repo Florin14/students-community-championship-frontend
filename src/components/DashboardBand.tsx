@@ -142,6 +142,10 @@ const DashboardBand = ({ showStats }: DashboardBandProps) => {
                   label: t(language, "home.statTeams"),
                 },
                 { value: totalCards, label: t(language, "home.statCards") },
+                {
+                  value: overview && overview.audienceMatches > 0 ? overview.audienceTotal : dash,
+                  label: t(language, "stats.audienceTotal"),
+                },
               ]}
             />
           </Inner>

@@ -1,6 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
 
-import authReducer from "./slices/authSlice";
+import { setupAuthInterceptors } from "../api/config";
+import authReducer, { logout } from "./slices/authSlice";
+import attendanceReducer from "./slices/attendanceSlice";
 import fieldsReducer from "./slices/fieldsSlice";
 import i18nReducer from "./slices/i18nSlice";
 import liveReducer from "./slices/liveSlice";
@@ -18,6 +20,7 @@ import themeReducer from "./slices/themeSlice";
 export const store = configureStore({
   reducer: {
     auth: authReducer,
+    attendance: attendanceReducer,
     fields: fieldsReducer,
     i18n: i18nReducer,
     live: liveReducer,
@@ -31,6 +34,13 @@ export const store = configureStore({
     teams: teamsReducer,
     theme: themeReducer,
     users: usersReducer,
+  },
+});
+
+setupAuthInterceptors({
+  getAccessToken: () => store.getState().auth.accessToken,
+  onUnauthorized: () => {
+    store.dispatch(logout());
   },
 });
 

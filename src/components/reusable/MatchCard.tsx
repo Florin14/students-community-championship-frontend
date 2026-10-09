@@ -1,4 +1,4 @@
-import { MapPin } from "lucide-react";
+import { MapPin, ShieldCheck, Users } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
@@ -27,6 +27,7 @@ const Card = styled.div`
     box-shadow: var(--shadow-card-hover);
     border-color: var(--border-strong);
   }
+  &:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
 `;
 
 const TopRow = styled.div`
@@ -110,9 +111,16 @@ const MatchCard = ({ match, language }: MatchCardProps) => {
     match.scoreAway !== undefined;
 
   return (
-    <Card onClick={() => navigate(`/matches/${match.id}`)}>
+    <Card role="link" tabIndex={0} onClick={() => navigate(`/matches/${match.id}`)}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") {
+          event.preventDefault();
+          navigate(`/matches/${match.id}`);
+        }
+      }}>
       <TopRow>
         <span>
+          {match.calendarLabel && `${match.calendarLabel} · `}
           {match.round
             ? `${t(language, "matches.round")} ${match.round} · `
             : ""}
@@ -153,6 +161,16 @@ const MatchCard = ({ match, language }: MatchCardProps) => {
         <Location>
           <MapPin size={13} />
           {match.location}
+        </Location>
+      )}
+      <Location>
+        <ShieldCheck size={13} />
+        {t(language, "attendance.matchCount", { count: match.attendanceTotal ?? 0 })}
+      </Location>
+      {match.audience != null && (
+        <Location>
+          <Users size={13} />
+          {t(language, "matches.audienceCount", { count: match.audience })}
         </Location>
       )}
     </Card>

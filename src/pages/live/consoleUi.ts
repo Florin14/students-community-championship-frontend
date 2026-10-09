@@ -173,6 +173,7 @@ export const Sheet = styled.div`
 
 export const SheetHeader = styled.div`
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -195,12 +196,14 @@ export const SheetHeader = styled.div`
 `;
 
 export const SheetBody = styled.div`
+  min-height: 0;
   padding: 14px 16px 18px;
   overflow-y: auto;
 `;
 
 export const SheetFooter = styled.div`
   display: flex;
+  flex-shrink: 0;
   gap: 10px;
   padding: 12px 16px 16px;
   border-top: 1px solid var(--divider);

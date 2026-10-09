@@ -11,6 +11,8 @@ import RequireRole from "./components/RequireRole";
 import LoadingState from "./components/reusable/LoadingState";
 import Admin from "./pages/admin/Admin";
 import AdminLogin from "./pages/admin/AdminLogin";
+import Attendance from "./pages/attendance/Attendance";
+import AttendanceStats from "./pages/attendance/AttendanceStats";
 import OperatorMatches from "./pages/live/OperatorMatches";
 import ScoringConsole from "./pages/live/ScoringConsole";
 import LiveScores from "./pages/LiveScores";
@@ -47,7 +49,15 @@ const router = createBrowserRouter([
       { path: "stats", element: <Stats /> },
       { path: "admin/login", element: <AdminLogin /> },
       {
-        // Scoring is open to operators; running the competition is not.
+        path: "admin/attendance",
+        element: <RequireRole minRole="OPERATOR" />,
+        children: [
+          { index: true, element: <Attendance /> },
+          { path: "stats", element: <AttendanceStats /> },
+        ],
+      },
+      {
+        // Operators can score; admins manage the competition.
         path: "admin/live",
         element: <RequireRole minRole="OPERATOR" />,
         children: [

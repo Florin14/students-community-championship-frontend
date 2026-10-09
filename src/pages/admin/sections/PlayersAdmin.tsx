@@ -1,5 +1,5 @@
 import { Button, MenuItem } from "@mui/material";
-import { Pencil, Plus, Trash2, User } from "lucide-react";
+import { Pencil, Plus, QrCode, Trash2, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
@@ -25,6 +25,7 @@ import {
   ToolbarGroup,
 } from "../adminUi";
 import PlayerModal from "../modals/PlayerModal";
+import PlayerQrModal from "../modals/PlayerQrModal";
 
 const PlayersAdmin = () => {
   const dispatch = useAppDispatch();
@@ -37,6 +38,7 @@ const PlayersAdmin = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
   const [deletingPlayer, setDeletingPlayer] = useState<Player | null>(null);
+  const [qrPlayer, setQrPlayer] = useState<Player | null>(null);
 
   useEffect(() => {
     dispatch(fetchPlayers());
@@ -160,6 +162,12 @@ const PlayersAdmin = () => {
                   <td>
                     <RowActions>
                       <IconAction
+                        title={t(language, "attendance.qrTitle")}
+                        onClick={() => setQrPlayer(player)}
+                      >
+                        <QrCode size={18} />
+                      </IconAction>
+                      <IconAction
                         title={t(language, "common.edit")}
                         onClick={() => {
                           setEditingPlayer(player);
@@ -189,6 +197,7 @@ const PlayersAdmin = () => {
         player={editingPlayer}
         onClose={() => setModalOpen(false)}
       />
+      <PlayerQrModal player={qrPlayer} onClose={() => setQrPlayer(null)} />
       <ConfirmDialog
         open={Boolean(deletingPlayer)}
         title={t(language, "admin.players.deleteTitle")}

@@ -82,8 +82,7 @@ const Score = styled.span`
 /**
  * The operator's home screen: the matches this account may score.
  *
- * For an operator that is exactly their assignments; administrators see every
- * match still open for scoring, since they can stand in on any field.
+ * Operators may access all open matches.
  */
 const OperatorMatches = () => {
   const dispatch = useAppDispatch();
@@ -106,8 +105,8 @@ const OperatorMatches = () => {
       {myMatches.length === 0 ? (
         <EmptyState
           icon={Radio}
-          title={t(language, "console.noMatches")}
-          subtitle={t(language, "console.noMatchesHint")}
+          title={t(language, "console.noOpenMatches")}
+          subtitle={t(language, "console.noOpenMatchesHint")}
         />
       ) : (
         <List>

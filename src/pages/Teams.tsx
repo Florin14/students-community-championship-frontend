@@ -105,6 +105,7 @@ const Teams = () => {
     return teams.filter(
       (team) =>
         team.name.toLowerCase().includes(query) ||
+        (team.university ?? "").toLowerCase().includes(query) ||
         (team.faculty ?? "").toLowerCase().includes(query)
     );
   }, [teams, search]);
@@ -146,6 +147,9 @@ const Teams = () => {
                 size={56}
               />
               <TeamName>{team.name}</TeamName>
+              {team.university && (
+                <Faculty><GraduationCap size={15} />{team.university}</Faculty>
+              )}
               {team.faculty && (
                 <Faculty>
                   <GraduationCap size={15} />

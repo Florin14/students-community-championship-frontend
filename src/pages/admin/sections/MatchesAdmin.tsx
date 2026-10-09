@@ -2,11 +2,13 @@ import { Button } from "@mui/material";
 import { ClipboardList, Pencil, Plus, Radio, Trash2, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
+import styled from "styled-components";
 
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
 import EmptyState from "../../../components/reusable/EmptyState";
 import MatchStateChip from "../../../components/reusable/MatchStateChip";
 import SeasonSelector from "../../../components/reusable/SeasonSelector";
+import TeamBadge from "../../../components/reusable/TeamBadge";
 import { t } from "../../../i18n";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { showSnackbar } from "../../../store/slices/snackbarSlice";
@@ -32,6 +34,19 @@ import {
 import MatchModal from "../modals/MatchModal";
 import OperatorsModal from "../modals/OperatorsModal";
 
+const MatchTeams = styled.div`
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+`;
+
+const TeamLabel = styled.span`
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+`;
+
 const MatchesAdmin = () => {
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
@@ -39,6 +54,12 @@ const MatchesAdmin = () => {
     (state) => state.seasons
   );
   const { matches } = useAppSelector((state) => state.matches);
+  const { teams } = useAppSelector((state) => state.teams);
+
+  const teamsById = useMemo(
+    () => new Map(teams.map((team) => [team.id, team])),
+    [teams]
+  );
 
   const seasonId = selectedSeasonId ?? activeSeason?.id ?? null;
 
@@ -125,73 +146,95 @@ const MatchesAdmin = () => {
               </tr>
             </thead>
             <tbody>
-              {sorted.map((match) => (
-                <tr key={match.id}>
-                  <td style={{ whiteSpace: "nowrap" }}>
-                    {formatDateTimeDot(parseApiDate(match.timestamp))}
-                  </td>
-                  <td>{match.round ?? "—"}</td>
-                  <td>
-                    <strong>{match.homeTeamName}</strong>
-                    <span style={{ color: "var(--text-disabled)" }}>
-                      {" "}
-                      vs{" "}
-                    </span>
-                    <strong>{match.awayTeamName}</strong>
-                  </td>
-                  <td style={{ color: "var(--text-secondary)" }}>
-                    {match.fieldName ?? "—"}
-                  </td>
-                  <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
-                    {match.scoreHome !== null &&
-                    match.scoreHome !== undefined &&
-                    match.scoreAway !== null &&
-                    match.scoreAway !== undefined
-                      ? `${match.scoreHome} : ${match.scoreAway}`
-                      : "—"}
-                  </td>
-                  <td>
-                    <MatchStateChip state={match.state} language={language} />
-                  </td>
-                  <td>
-                    <RowActions>
-                      <IconAction
-                        as={Link}
-                        to={`/admin/live/${match.id}`}
-                        $tone="accent"
-                        title={t(language, "admin.matches.openConsole")}
-                      >
-                        <Radio size={15} />
-                      </IconAction>
-                      <IconAction
-                        title={t(language, "admin.matches.assignOperators")}
-                        onClick={() => {
-                          setEditingMatch(match);
-                          setOperatorsModalOpen(true);
-                        }}
-                      >
-                        <Users size={15} />
-                      </IconAction>
-                      <IconAction
-                        title={t(language, "common.edit")}
-                        onClick={() => {
-                          setEditingMatch(match);
-                          setMatchModalOpen(true);
-                        }}
-                      >
-                        <Pencil size={15} />
-                      </IconAction>
-                      <IconAction
-                        $tone="danger"
-                        title={t(language, "common.delete")}
-                        onClick={() => setDeletingMatch(match)}
-                      >
-                        <Trash2 size={15} />
-                      </IconAction>
-                    </RowActions>
-                  </td>
-                </tr>
-              ))}
+              {sorted.map((match) => {
+                const homeTeam = teamsById.get(match.homeTeamId);
+                const awayTeam = teamsById.get(match.awayTeamId);
+
+                return (
+                  <tr key={match.id}>
+                    <td style={{ whiteSpace: "nowrap" }}>
+                      {formatDateTimeDot(parseApiDate(match.timestamp))}
+                    </td>
+                    <td>{match.round ?? match.calendarLabel ?? "—"}</td>
+                    <td>
+                      <MatchTeams>
+                        <TeamLabel>
+                          <TeamBadge
+                            name={match.homeTeamName ?? homeTeam?.name}
+                            shortName={match.homeTeamShortName ?? homeTeam?.shortName}
+                            logo={match.homeTeamLogo ?? homeTeam?.logo}
+                            color={match.homeTeamColor ?? homeTeam?.color}
+                            size={28}
+                          />
+                          <strong>{match.homeTeamName ?? homeTeam?.name}</strong>
+                        </TeamLabel>
+                        <span style={{ color: "var(--text-disabled)" }}>vs</span>
+                        <TeamLabel>
+                          <TeamBadge
+                            name={match.awayTeamName ?? awayTeam?.name}
+                            shortName={match.awayTeamShortName ?? awayTeam?.shortName}
+                            logo={match.awayTeamLogo ?? awayTeam?.logo}
+                            color={match.awayTeamColor ?? awayTeam?.color}
+                            size={28}
+                          />
+                          <strong>{match.awayTeamName ?? awayTeam?.name}</strong>
+                        </TeamLabel>
+                      </MatchTeams>
+                    </td>
+                    <td style={{ color: "var(--text-secondary)" }}>
+                      {match.fieldName ?? "—"}
+                    </td>
+                    <td style={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
+                      {match.scoreHome !== null &&
+                      match.scoreHome !== undefined &&
+                      match.scoreAway !== null &&
+                      match.scoreAway !== undefined
+                        ? `${match.scoreHome} : ${match.scoreAway}`
+                        : "—"}
+                    </td>
+                    <td>
+                      <MatchStateChip state={match.state} language={language} />
+                    </td>
+                    <td>
+                      <RowActions>
+                        <IconAction
+                          as={Link}
+                          to={`/admin/live/${match.id}`}
+                          $tone="accent"
+                          title={t(language, "admin.matches.openConsole")}
+                        >
+                          <Radio size={15} />
+                        </IconAction>
+                        <IconAction
+                          title={t(language, "admin.matches.assignOperators")}
+                          onClick={() => {
+                            setEditingMatch(match);
+                            setOperatorsModalOpen(true);
+                          }}
+                        >
+                          <Users size={15} />
+                        </IconAction>
+                        <IconAction
+                          title={t(language, "common.edit")}
+                          onClick={() => {
+                            setEditingMatch(match);
+                            setMatchModalOpen(true);
+                          }}
+                        >
+                          <Pencil size={15} />
+                        </IconAction>
+                        <IconAction
+                          $tone="danger"
+                          title={t(language, "common.delete")}
+                          onClick={() => setDeletingMatch(match)}
+                        >
+                          <Trash2 size={15} />
+                        </IconAction>
+                      </RowActions>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </AdminTable>
         </TableWrap>

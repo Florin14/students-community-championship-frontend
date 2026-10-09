@@ -80,13 +80,62 @@ different design rules from the rest of the app:
 
 - It is built for a phone held in one hand, outdoors, at arm's length. Touch
   targets are large; nothing important sits below the fold.
-- **A goal takes two taps** (team, then scorer), a card three. The minute is
-  filled from the running clock and only edited when wrong.
+- **Goals:** choose the scorer, review the optional teammate assist, then tap
+  Save goal. Player selections keep the draft open until it is saved. Cards
+  and own goals keep direct entry. The minute follows the running clock unless
+  the operator explicitly corrects it.
 - Every action is queued locally in `scc_event_queue` with a client-generated
   UUID before it is sent, and retried when the connection returns. Each event
   shows its own state: saved, pending, failed.
 - Undo is always visible and voids the last action rather than deleting it.
-- Operators only ever see the matches assigned to them.
+- Operator is the sole stadium staff role and may score any open match and
+  confirm attendance. Assignments record responsibility without restricting access.
+  Former Volunteer accounts migrate to Operator; stored browser sessions keep
+  their account and token while updating the legacy role to Operator.
+- Admins and super-admins may score any open match; competition
+  administration remains restricted to admins. Audience is optional (unknown
+  is null, zero is valid), saved online before the result is locked.
+
+Player photos are required when an admin creates or saves a player. The modal
+must show a readable image before enabling Save, including for legacy players.
+
+Attendance totals belong to each match and are shown in match cards/details,
+including counts for each team. The season total counts check-ins, not unique
+people. The home band shows total spectators instead of a global check-in count.
+Audience statistics count finished matches with recorded numbers only; zero
+is a known value and null is unknown. Request IDs prevent stale audience results
+from replacing the selected season's response.
+
+Staff see an in-app reminder after each full hour of playing time while the
+clock still runs. Reminders poll once a minute when the app is visible and
+online; they never finish or pause a match automatically. Dismissal is stored
+per account, match kickoff and playing-hour bucket, so reloading does not repeat
+it in the same hour. Paused and locked matches are ignored.
 
 When touching this screen, test it throttled and offline — that is its real
 operating condition.
+
+Match details show active events beneath the corresponding team and compare
+goals, assists, cards and check-ins in the statistics section. Match listings
+use a single full-width card per row. Team squads group players by position,
+including a group for legacy players without a position.
+
+Teams have separate optional university and faculty fields. New match forms
+default to the selected/active season and the current local date/time. Rounds
+are weekly from the season start using calendar days (not 24-hour durations);
+manual round overrides survive date changes until the user requests recalculation.
+Field and location remain explicit choices.
+
+Seasons may have an editable calendar of inclusive date ranges, phase labels,
+optional round numbers and breaks. A configured calendar takes priority over
+weekly arithmetic. No range, a break, or an unnumbered phase produces no
+automatic round; manual overrides remain available for rescheduled matches.
+The 24-period 2026–2027 template mirrors the organiser's image, including its
+repeated knockout names; apply it explicitly in the season editor and save.
+Public match lists show the calendar and group unnumbered phases by their
+calendarLabel. Calendar edits do not modify the rounds/results of existing matches.
+
+Event entry follows the shared live clock until manual correction is selected.
+Corrections affect the recorded event only; returning to the scorer step keeps
+the draft and assist choice. Clock interpolation anchors reset on every server
+clock response so scoring and lifecycle changes never count elapsed time twice.

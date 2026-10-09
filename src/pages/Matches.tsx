@@ -7,6 +7,7 @@ import styled from "styled-components";
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
 import MatchCard from "../components/reusable/MatchCard";
+import CompetitionCalendar from "../components/reusable/CompetitionCalendar";
 import StyledSelect from "../components/reusable/StyledSelect";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
@@ -83,7 +84,7 @@ const RoundCount = styled.span`
 
 const Grid = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 14px;
 
   @media (max-width: 420px) {
@@ -92,6 +93,8 @@ const Grid = styled.div`
 `;
 
 interface RoundBucket {
+  key: string;
+  label: string | null;
   round: number | null;
   matches: Match[];
 }
@@ -99,7 +102,7 @@ interface RoundBucket {
 const Matches = () => {
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
-  const { selectedSeasonId, activeSeason } = useAppSelector(
+  const { selectedSeasonId, activeSeason, seasons } = useAppSelector(
     (state) => state.seasons
   );
   const { matches, loading } = useAppSelector((state) => state.matches);
@@ -109,6 +112,8 @@ const Matches = () => {
   const [teamFilter, setTeamFilter] = useState<number | "">("");
 
   const seasonId = selectedSeasonId ?? activeSeason?.id;
+  const season = seasons.find((item) => item.id === seasonId) ??
+    (activeSeason?.id === seasonId ? activeSeason : null);
 
   useEffect(() => {
     const params = seasonId ? { seasonId } : undefined;
@@ -131,24 +136,20 @@ const Matches = () => {
       return true;
     });
 
-    const byRound = new Map<number | null, Match[]>();
+    const byRound = new Map<string, RoundBucket>();
     filtered.forEach((match) => {
-      const key = match.round ?? null;
-      const bucket = byRound.get(key) ?? [];
-      bucket.push(match);
+      const round = match.round ?? null;
+      const label = round === null ? match.calendarLabel ?? null : null;
+      const key = round === null ? `phase:${label ?? "none"}` : `round:${round}`;
+      const bucket = byRound.get(key) ?? { key, round, label, matches: [] };
+      bucket.matches.push(match);
       byRound.set(key, bucket);
     });
 
-    const rounds = [...byRound.keys()].sort((a, b) => {
-      if (a === null) return 1;
-      if (b === null) return -1;
-      return b - a;
-    });
-
-    return rounds.map((round) => ({
-      round,
-      matches: byRound.get(round) ?? [],
-    }));
+    return [...byRound.values()].sort((a, b) =>
+      Math.max(...b.matches.map((match) => new Date(match.timestamp.replace(" ", "T")).getTime())) -
+      Math.max(...a.matches.map((match) => new Date(match.timestamp.replace(" ", "T")).getTime()))
+    );
   }, [matches, tab, teamFilter]);
 
   const tabs: { key: Tab; label: string }[] = [
@@ -159,6 +160,7 @@ const Matches = () => {
 
   return (
     <>
+      {season && <CompetitionCalendar season={season} language={language} />}
       <FilterBar>
         <Tabs>
           {tabs.map(({ key, label }) => (
@@ -200,9 +202,9 @@ const Matches = () => {
           subtitle={t(language, "matches.emptyHint")}
         />
       ) : (
-        buckets.map(({ round, matches: roundMatches }) => (
+        buckets.map(({ key, round, label, matches: roundMatches }) => (
           <RoundGroup
-            key={round ?? "none"}
+            key={key}
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.25, ease: "easeOut" }}
@@ -211,7 +213,7 @@ const Matches = () => {
               <h3>
                 {round !== null
                   ? `${t(language, "matches.round")} ${round}`
-                  : t(language, "matches.noRound")}
+                  : label ?? t(language, "matches.noRound")}
               </h3>
               <RoundCount>{roundMatches.length}</RoundCount>
             </RoundHeader>

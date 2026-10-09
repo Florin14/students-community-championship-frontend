@@ -88,6 +88,7 @@ const TeamsAdmin = () => {
                 <th>{t(language, "admin.teams.colTeam")}</th>
                 <th>{t(language, "admin.teams.colShortName")}</th>
                 <th>{t(language, "admin.teams.colFaculty")}</th>
+                <th>{t(language, "admin.teams.university")}</th>
                 <th>{t(language, "admin.teams.colPlayers")}</th>
                 <th />
               </tr>
@@ -115,6 +116,7 @@ const TeamsAdmin = () => {
                   </td>
                   <td>{team.shortName ?? "—"}</td>
                   <td>{team.faculty ?? "—"}</td>
+                  <td>{team.university ?? "—"}</td>
                   <td>{team.playerCount}</td>
                   <td>
                     <RowActions>

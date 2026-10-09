@@ -98,6 +98,8 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
   const [shirtNumber, setShirtNumber] = useState("");
   const [teamId, setTeamId] = useState<number | "">("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [photoReady, setPhotoReady] = useState(false);
+  const [photoError, setPhotoError] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -111,25 +113,38 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
       );
       setTeamId(player?.teamId ?? "");
       setAvatar(player?.avatar ?? null);
+      setPhotoReady(false);
+      setPhotoError(false);
     }
   }, [open, player]);
 
   const handleAvatarChange = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      setAvatar(await fileToDataUrl(file));
+      try {
+        const nextAvatar = await fileToDataUrl(file);
+        if (nextAvatar !== avatar) {
+          setPhotoReady(false);
+          setPhotoError(false);
+          setAvatar(nextAvatar);
+        }
+      } catch {
+        dispatch(showSnackbar({ message: t(language, "admin.players.photoInvalid"), severity: "error" }));
+      }
+      event.target.value = "";
     }
   };
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (!avatar || !photoReady) return;
     setSaving(true);
     const payload = {
       name,
       position: position === "" ? null : position,
       shirtNumber: shirtNumber === "" ? null : Number(shirtNumber),
       teamId: teamId === "" ? null : teamId,
-      avatar: avatar ?? null,
+      avatar,
     };
     const action = player
       ? await dispatch(updatePlayerThunk({ id: player.id, data: payload }))
@@ -173,7 +188,12 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
               <AvatarRow>
                 <Avatar>
                   {avatarUrl ? (
-                    <img src={avatarUrl} alt={name} />
+                    <img
+                      src={avatarUrl}
+                      alt={name}
+                      onLoad={() => setPhotoReady(true)}
+                      onError={() => { setPhotoReady(false); setPhotoError(true); }}
+                    />
                   ) : (
                     (name || "?").slice(0, 1).toUpperCase()
                   )}
@@ -188,6 +208,9 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
                   />
                 </UploadLabel>
               </AvatarRow>
+              <p style={{ fontSize: "0.8rem", color: photoError ? "var(--danger)" : "var(--text-secondary)" }}>
+                {t(language, photoError ? "admin.players.photoInvalid" : "admin.players.photoRequired")}
+              </p>
             </FullRow>
             <FullRow>
               <StyledTextField
@@ -256,7 +279,7 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
           <Button onClick={onClose} color="inherit">
             {t(language, "common.cancel")}
           </Button>
-          <Button type="submit" variant="contained" disabled={saving || !name}>
+          <Button type="submit" variant="contained" disabled={saving || !name.trim() || !photoReady}>
             {t(language, "common.save")}
           </Button>
         </DialogActions>
