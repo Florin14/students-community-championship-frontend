@@ -1,5 +1,6 @@
 import {
   Button,
+  Alert,
   Dialog,
   DialogActions,
   DialogContent,
@@ -8,9 +9,11 @@ import {
   InputLabel,
   MenuItem,
 } from "@mui/material";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import StyledSelect from "../../../components/reusable/StyledSelect";
+import AudienceField from "../../../components/reusable/AudienceField";
+import { isValidAudience } from "../../../utils/audience";
 import StyledTextField from "../../../components/reusable/StyledTextField";
 import { t } from "../../../i18n";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -22,6 +25,7 @@ import {
 } from "../../../store/slices/thunks/matchesThunks";
 import type { Match, MatchState } from "../../../types";
 import { parseApiDate, toInputDateTimeLocal } from "../../../utils/dateFormat";
+import { findCalendarPeriod, weeklyRound } from "../../../utils/scheduling";
 import { FieldGrid, FullRow } from "../adminUi";
 
 // A finished match is only ever moved by the console (finish / reopen), so the
@@ -38,7 +42,7 @@ interface MatchModalProps {
 const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
-  const { seasons } = useAppSelector((state) => state.seasons);
+  const { seasons, activeSeason } = useAppSelector((state) => state.seasons);
   const { teams } = useAppSelector((state) => state.teams);
   const { fields } = useAppSelector((state) => state.fields);
 
@@ -49,27 +53,53 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
   const [timestamp, setTimestamp] = useState("");
   const [fieldId, setFieldId] = useState<number | "">("");
   const [location, setLocation] = useState("");
+  const [audience, setAudience] = useState("");
   const [state, setState] = useState<MatchState>("SCHEDULED");
   const [saving, setSaving] = useState(false);
+  const [manualRound, setManualRound] = useState(false);
+  const initialized = useRef(false);
+  const formSeason = seasons.find((season) => season.id === formSeasonId) ??
+    (activeSeason?.id === formSeasonId ? activeSeason : null);
+  const hasCalendar = Boolean(formSeason?.calendar?.length);
+  const calendarPeriod = useMemo(() => findCalendarPeriod(timestamp, formSeason?.calendar),
+    [timestamp, formSeason?.calendar]);
 
   useEffect(() => {
-    if (open) {
-      setFormSeasonId(match?.seasonId ?? seasonId ?? "");
+    if (!open) { initialized.current = false; return; }
+    if (!initialized.current) {
+      initialized.current = true;
+      setFormSeasonId(match?.seasonId ?? seasonId ?? activeSeason?.id ?? "");
       setHomeTeamId(match?.homeTeamId ?? "");
       setAwayTeamId(match?.awayTeamId ?? "");
       setRound(match?.round ? String(match.round) : "");
       setTimestamp(
-        match ? toInputDateTimeLocal(parseApiDate(match.timestamp)) : ""
+        match ? toInputDateTimeLocal(parseApiDate(match.timestamp)) : toInputDateTimeLocal(new Date())
       );
       setFieldId(match?.fieldId ?? "");
       setLocation(match?.location ?? "");
+      setAudience(match?.audience == null ? "" : String(match.audience));
       setState(match?.state === "FINISHED" ? "SCHEDULED" : match?.state ?? "SCHEDULED");
+      setManualRound(false);
     }
-  }, [open, match, seasonId]);
+  }, [open, match, seasonId, activeSeason]);
+
+  useEffect(() => {
+    if (!open || match) return;
+    if (formSeasonId === "" && (seasonId ?? activeSeason?.id)) {
+      setFormSeasonId(seasonId ?? activeSeason?.id ?? "");
+    }
+    if (!manualRound) {
+      const next = hasCalendar
+        ? calendarPeriod && !calendarPeriod.isBreak ? calendarPeriod.round : null
+        : weeklyRound(timestamp, formSeason?.startDate);
+      setRound(next == null ? "" : String(next));
+    }
+  }, [open, match, formSeasonId, formSeason?.startDate, formSeason?.calendar, hasCalendar,
+    calendarPeriod, manualRound, timestamp, seasonId, activeSeason?.id]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
-    if (formSeasonId === "" || homeTeamId === "" || awayTeamId === "") return;
+    if (formSeasonId === "" || homeTeamId === "" || awayTeamId === "" || (match && !isValidAudience(audience))) return;
     setSaving(true);
 
     const common = {
@@ -85,6 +115,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
             id: match.id,
             data: {
               ...common,
+              audience: audience === "" ? null : Number(audience),
               homeTeamId,
               awayTeamId,
               ...(match.state !== "FINISHED" && { state }),
@@ -139,6 +170,13 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
         </DialogTitle>
         <DialogContent sx={{ pt: "10px !important" }}>
           <FieldGrid>
+            {hasCalendar && <FullRow>
+              <Alert severity={!calendarPeriod || calendarPeriod.isBreak ? "warning" : "info"}>
+                {calendarPeriod
+                  ? t(language, calendarPeriod.isBreak ? "calendar.breakDate" : "calendar.selectedPeriod", { label: calendarPeriod.label })
+                  : t(language, "calendar.outsideDate")}
+              </Alert>
+            </FullRow>}
             <FullRow>
               <FormControl fullWidth required>
                 <InputLabel sx={{ color: "var(--text-secondary)" }}>
@@ -212,9 +250,11 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               label={t(language, "admin.matches.round")}
               type="number"
               value={round}
-              onChange={(event) => setRound(event.target.value)}
+              onChange={(event) => { setManualRound(true); setRound(event.target.value); }}
               fullWidth
               inputProps={{ min: 1 }}
+              helperText={!match ? t(language, manualRound ? "admin.matches.roundManual" :
+                hasCalendar ? "calendar.roundHint" : formSeason?.startDate ? "admin.matches.roundAuto" : "admin.matches.roundNoStart") : undefined}
             />
             <StyledTextField
               label={t(language, "admin.matches.dateTime")}
@@ -225,6 +265,9 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               fullWidth
               InputLabelProps={{ shrink: true }}
             />
+            {!match && manualRound && (
+              <FullRow><Button size="small" onClick={() => setManualRound(false)}>{t(language, "admin.matches.recalculateRound")}</Button></FullRow>
+            )}
             <FormControl fullWidth>
               <InputLabel sx={{ color: "var(--text-secondary)" }}>
                 {t(language, "admin.matches.field")}
@@ -232,13 +275,11 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               <StyledSelect
                 label={t(language, "admin.matches.field")}
                 value={fieldId}
-                onChange={(event) =>
-                  setFieldId(
-                    event.target.value === ""
-                      ? ""
-                      : Number(event.target.value)
-                  )
-                }
+                onChange={(event) => {
+                  const next = event.target.value === "" ? "" : Number(event.target.value);
+                  setFieldId(next);
+                  setLocation(fields.find((field) => field.id === next)?.location ?? "");
+                }}
               >
                 <MenuItem value="">
                   {t(language, "admin.matches.noField")}
@@ -256,6 +297,11 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
               onChange={(event) => setLocation(event.target.value)}
               fullWidth
             />
+            {match && (
+              <FullRow>
+                <AudienceField value={audience} onChange={setAudience} />
+              </FullRow>
+            )}
             {match && match.state !== "FINISHED" && (
               <FullRow>
                 <FormControl fullWidth>
@@ -289,6 +335,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
             variant="contained"
             disabled={
               saving ||
+              Boolean(match && !isValidAudience(audience)) ||
               formSeasonId === "" ||
               homeTeamId === "" ||
               awayTeamId === "" ||

@@ -6,6 +6,7 @@ import {
   MapPin,
   SearchX,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 import { useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
@@ -13,6 +14,7 @@ import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
 import MatchTimeline from "../components/reusable/MatchTimeline";
+import MatchStatistics from "../components/reusable/MatchStatistics";
 import LoadingState from "../components/reusable/LoadingState";
 import MatchStateChip from "../components/reusable/MatchStateChip";
 import SectionHeading from "../components/reusable/SectionHeading";
@@ -83,11 +85,31 @@ const RoundChip = styled.span`
 
 const Board = styled.div`
   display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 18px;
   max-width: 760px;
   margin: 0 auto;
+  @media (max-width: 640px) { gap: 12px; }
+`;
+
+const TeamEvents = styled.div<{ $away: boolean }>`
+  grid-column: ${({ $away }) => $away ? 3 : 1};
+  grid-row: 2;
+  align-self: start;
+  min-width: 0;
+  width: 100%;
+  border-top: 1px solid var(--divider);
+  padding-top: 12px;
+  > span {
+    display: block;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.73rem;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
 `;
 
 const TeamSide = styled(Link)<{ $align: "left" | "right" }>`
@@ -191,8 +213,7 @@ const MatchDetails = () => {
     };
   }, [dispatch, id]);
 
-  // Refresh while the match is being played, so the timeline fills in without
-  // the reader touching anything. A finished match never re-fetches.
+  // Attendance changes before kickoff; the timeline changes during play.
   usePolling(
     () => {
       if (id) dispatch(fetchMatchById({ id: Number(id) }));
@@ -200,7 +221,7 @@ const MatchDetails = () => {
     {
       intervalMs: 10000,
       enabled:
-        match?.state === "LIVE" || match?.state === "HALF_TIME",
+        match?.state === "SCHEDULED" || match?.state === "LIVE" || match?.state === "HALF_TIME",
       immediate: false,
     }
   );
@@ -225,7 +246,7 @@ const MatchDetails = () => {
     match.scoreAway !== null &&
     match.scoreAway !== undefined;
 
-  const events = match.events ?? [];
+  const events = (match.events ?? []).filter((event) => event.status === "ACTIVE");
   const isLive = match.state === "LIVE" || match.state === "HALF_TIME";
   const showTimeline = events.length > 0 || match.state === "FINISHED";
 
@@ -243,6 +264,7 @@ const MatchDetails = () => {
       >
         <HeroTop>
           {match.seasonName && <span>{match.seasonName}</span>}
+          {match.calendarLabel && <RoundChip>{match.calendarLabel}</RoundChip>}
           {match.round !== null && match.round !== undefined && (
             <RoundChip>
               {t(language, "matches.round")} {match.round}
@@ -279,9 +301,25 @@ const MatchDetails = () => {
             />
             <TeamName>{match.awayTeamName}</TeamName>
           </TeamSide>
+          {showTimeline && (
+            <>
+              <TeamEvents $away={false} aria-label={t(language, "matchDetails.teamEvents", { team: match.homeTeamName ?? "—" })}>
+                <span>{t(language, "matchDetails.events")}</span>
+                <MatchTimeline events={events.filter((event) => event.teamId === match.homeTeamId)} homeTeamId={match.homeTeamId} language={language} embedded />
+              </TeamEvents>
+              <TeamEvents $away aria-label={t(language, "matchDetails.teamEvents", { team: match.awayTeamName ?? "—" })}>
+                <span>{t(language, "matchDetails.events")}</span>
+                <MatchTimeline events={events.filter((event) => event.teamId === match.awayTeamId)} homeTeamId={match.homeTeamId} language={language} embedded />
+              </TeamEvents>
+            </>
+          )}
         </Board>
 
         <HeroMeta>
+          <span><ShieldCheck size={15} />{t(language, "attendance.matchCount", { count: match.attendanceTotal ?? 0 })}</span>
+          {match.audience != null && (
+            <span><Users size={15} />{t(language, "matches.audienceCount", { count: match.audience })}</span>
+          )}
           <span>
             <CalendarDays size={15} />
             {formatDateTimeDot(parseApiDate(match.timestamp))}
@@ -301,21 +339,11 @@ const MatchDetails = () => {
         </HeroMeta>
       </Hero>
 
-      {showTimeline && (
-        <>
-          <SectionHeading
-            title={t(language, "matchDetails.timeline")}
-            subtitle={
-              isLive ? t(language, "live.autoUpdating") : undefined
-            }
-          />
-          <MatchTimeline
-            events={events}
-            homeTeamId={match.homeTeamId}
-            language={language}
-          />
-        </>
-      )}
+      <SectionHeading
+        title={t(language, "matchDetails.statistics")}
+        subtitle={isLive ? t(language, "live.autoUpdating") : t(language, "attendance.matchHint")}
+      />
+      <MatchStatistics match={match} language={language} />
 
       {match.confirmedByName && (
         <ConfirmedNote>

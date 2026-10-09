@@ -26,6 +26,7 @@ const LogoRow = styled.div`
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 `;
 
 const UploadLabel = styled.label`
@@ -64,6 +65,7 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
   const [name, setName] = useState("");
   const [shortName, setShortName] = useState("");
   const [faculty, setFaculty] = useState("");
+  const [university, setUniversity] = useState("");
   const [description, setDescription] = useState("");
   const [color, setColor] = useState("#A3E635");
   const [logo, setLogo] = useState<string | null>(null);
@@ -74,6 +76,7 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
       setName(team?.name ?? "");
       setShortName(team?.shortName ?? "");
       setFaculty(team?.faculty ?? "");
+      setUniversity(team?.university ?? "");
       setDescription(team?.description ?? "");
       setColor(team?.color ?? "#A3E635");
       setLogo(team?.logo ?? null);
@@ -91,9 +94,10 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
     event.preventDefault();
     setSaving(true);
     const payload = {
-      name,
+      name: name.trim(),
       shortName: shortName || null,
       faculty: faculty || null,
+      university: university.trim() || null,
       description: description || null,
       color: color || null,
       logo: logo ?? null,
@@ -160,6 +164,9 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
               onChange={(event) => setName(event.target.value)}
               required
               fullWidth
+              autoFocus
+              inputProps={{ maxLength: 80 }}
+              InputLabelProps={{ shrink: true }}
             />
             <StyledTextField
               label={t(language, "admin.teams.shortName")}
@@ -169,6 +176,15 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
               }
               fullWidth
             />
+            <FullRow>
+              <StyledTextField
+                label={t(language, "admin.teams.university")}
+                value={university}
+                onChange={(event) => setUniversity(event.target.value)}
+                fullWidth
+                inputProps={{ maxLength: 160 }}
+              />
+            </FullRow>
             <FullRow>
               <StyledTextField
                 label={t(language, "admin.teams.faculty")}
@@ -183,6 +199,7 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
               value={color}
               onChange={(event) => setColor(event.target.value)}
               fullWidth
+              InputLabelProps={{ shrink: true }}
             />
             <FullRow>
               <StyledTextField
@@ -200,7 +217,7 @@ const TeamModal = ({ open, team, onClose }: TeamModalProps) => {
           <Button onClick={onClose} color="inherit">
             {t(language, "common.cancel")}
           </Button>
-          <Button type="submit" variant="contained" disabled={saving || !name}>
+          <Button type="submit" variant="contained" disabled={saving || !name.trim()}>
             {t(language, "common.save")}
           </Button>
         </DialogActions>

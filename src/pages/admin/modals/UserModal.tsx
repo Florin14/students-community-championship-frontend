@@ -5,6 +5,7 @@ import {
   DialogContent,
   DialogTitle,
   FormControl,
+  FormHelperText,
   FormControlLabel,
   InputLabel,
   MenuItem,
@@ -177,6 +178,9 @@ const UserModal = ({ open, user, onClose }: UserModalProps) => {
                   </MenuItem>
                 ))}
               </StyledSelect>
+              {role === "OPERATOR" && (
+                <FormHelperText>{t(language, "admin.users.staffRoleHint")}</FormHelperText>
+              )}
             </FormControl>
             {user && (
               <FullRow>

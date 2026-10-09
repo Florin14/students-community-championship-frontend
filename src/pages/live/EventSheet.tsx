@@ -1,7 +1,9 @@
-import { Check, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { ArrowLeft, Check, Pencil, X } from "lucide-react";
+import { useMemo, useState } from "react";
+import { createPortal } from "react-dom";
+import styled from "styled-components";
 
-import { t, type Language } from "../../i18n";
+import { t, type Language, type TranslationKey } from "../../i18n";
 import type { MatchDetails, MatchEventType, Player } from "../../types";
 import {
   Banner,
@@ -38,52 +40,132 @@ interface EventSheetProps {
   onClose: () => void;
 }
 
-const LABEL_KEY: Record<MatchEventType, string> = {
+const LABEL_KEY: Record<MatchEventType, TranslationKey> = {
   GOAL: "event.GOAL",
   OWN_GOAL: "event.OWN_GOAL",
   YELLOW_CARD: "event.YELLOW_CARD",
   RED_CARD: "event.RED_CARD",
 };
 
-const AssistToggle = ({
-  checked,
-  onChange,
-  label,
-}: {
-  checked: boolean;
-  onChange: (value: boolean) => void;
-  label: string;
-}) => (
-  <label
-    style={{
-      display: "flex",
-      alignItems: "center",
-      gap: 10,
-      minHeight: 44,
-      padding: "0 2px 10px",
-      cursor: "pointer",
-      fontSize: "0.88rem",
-      color: "var(--text-secondary)",
-      fontWeight: 600,
-    }}
-  >
-    <input
-      type="checkbox"
-      checked={checked}
-      onChange={(event) => onChange(event.target.checked)}
-      style={{ width: 20, height: 20, accentColor: "var(--accent)" }}
-    />
-    {label}
-  </label>
-);
+const MinutePanel = styled.div`
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--divider);
+  > strong { font-size: 0.8rem; color: var(--text-secondary); }
+  > small { font-size: 0.75rem; color: var(--text-secondary); }
+  > div { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  output { font-family: var(--font-heading); font-size: 1.15rem; font-weight: 800; color: var(--accent); }
+  .minute-action {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    font-size: 0.78rem;
+  }
+`;
+
+const ScorerButton = styled(PlayerButton)`
+  &[aria-pressed="true"] {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+`;
+
+const ScorerSummary = styled.div`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: var(--bg-surface);
+
+  strong {
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    overflow-wrap: anywhere;
+  }
+`;
+
+const AssistOptions = styled.fieldset`
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+
+  legend {
+    padding: 0 0 8px;
+    font-family: var(--font-heading);
+    font-weight: 700;
+    font-size: 0.92rem;
+    color: var(--text-primary);
+  }
+
+  p {
+    margin: 0 0 6px;
+    font-size: 0.8rem;
+    line-height: 1.45;
+    color: var(--text-secondary);
+  }
+`;
+
+const AssistOption = styled.label<{ $selected: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  padding: 10px 12px;
+  border: 1px solid ${({ $selected }) => $selected ? "var(--accent)" : "var(--border)"};
+  border-radius: 12px;
+  background: ${({ $selected }) => $selected ? "var(--accent-soft)" : "var(--bg-surface)"};
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  input {
+    width: 20px;
+    height: 20px;
+    margin: 0;
+    flex: none;
+    accent-color: var(--accent);
+  }
+
+  &:focus-within {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+`;
+
+const GoalFooter = styled(SheetFooter)`
+  flex-direction: column;
+
+  > small {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    overflow-wrap: anywhere;
+  }
+
+  > div {
+    display: flex;
+    gap: 10px;
+  }
+`;
 
 /**
- * The two-tap entry flow.
- *
- * Both squads are shown side by side so picking the player also settles the
- * team: one tap on the action, one on the name, and the event is on its way. An
- * assist costs one extra tap and is opt-in through the toggle, so the common
- * case stays at two.
+ * Picking a goal scorer opens a review with an optional teammate assist.
+ * Only the Save goal button submits it. Cards and own goals keep direct entry.
  */
 const EventSheet = ({
   type,
@@ -95,16 +177,14 @@ const EventSheet = ({
   onSubmit,
   onClose,
 }: EventSheetProps) => {
-  const [minute, setMinute] = useState<number>(defaultMinute ?? 1);
-  const [wantsAssist, setWantsAssist] = useState(false);
+  const [manualMinute, setManualMinute] = useState<number | null>(null);
+  const minute = manualMinute ?? defaultMinute ?? 1;
+  const [assistPlayerId, setAssistPlayerId] = useState<number | null>(null);
+  const [choosingScorer, setChoosingScorer] = useState(true);
   const [scorer, setScorer] = useState<{
     playerId: number | null;
     teamId: number;
   } | null>(null);
-
-  useEffect(() => {
-    setMinute(defaultMinute ?? 1);
-  }, [defaultMinute]);
 
   const isGoal = type === "GOAL";
   const isOwnGoal = type === "OWN_GOAL";
@@ -133,8 +213,12 @@ const EventSheet = ({
   };
 
   const pickPlayer = (playerTeamId: number, playerId: number | null) => {
-    if (isGoal && wantsAssist && playerId !== null) {
+    if (isGoal) {
+      if (scorer?.teamId !== playerTeamId || assistPlayerId === playerId) {
+        setAssistPlayerId(null);
+      }
       setScorer({ playerId, teamId: playerTeamId });
+      setChoosingScorer(false);
       return;
     }
     submit(playerTeamId, playerId, null);
@@ -147,10 +231,17 @@ const EventSheet = ({
     return squad.filter((player) => player.id !== scorer.playerId);
   }, [scorer, match.homeTeamId, homePlayers, awayPlayers]);
 
-  const heading = t(language, LABEL_KEY[type] as never);
+  const heading = t(language, LABEL_KEY[type]);
+  const scorerPlayer = [...homePlayers, ...awayPlayers].find((player) => player.id === scorer?.playerId);
+  const scorerName = scorerPlayer
+    ? `${scorerPlayer.shirtNumber == null ? "" : `#${scorerPlayer.shirtNumber} · `}${scorerPlayer.name}`
+    : t(language, "console.unknownPlayer");
+  const selectedAssist = assistCandidates.find((player) => player.id === assistPlayerId);
+  const selectedAssistId = selectedAssist?.id ?? null;
+  const showGoalDetails = isGoal && scorer !== null && !choosingScorer;
 
-  const promptKey = scorer
-    ? "console.pickAssist"
+  const promptKey = showGoalDetails
+    ? "console.goalDetails"
     : isCard
       ? "console.pickCardPlayer"
       : isOwnGoal
@@ -177,9 +268,10 @@ const EventSheet = ({
         </span>
       )}
       {squad.map((player) => (
-        <PlayerButton
+        <ScorerButton
           key={player.id}
           type="button"
+          aria-pressed={isGoal ? scorer?.teamId === teamId && scorer.playerId === player.id : undefined}
           onClick={() => pickPlayer(teamId, player.id)}
         >
           <ShirtNumber>
@@ -188,36 +280,54 @@ const EventSheet = ({
               : "–"}
           </ShirtNumber>
           <span style={{ overflowWrap: "anywhere" }}>{player.name}</span>
-        </PlayerButton>
+        </ScorerButton>
       ))}
       {!isCard && (
-        <PlayerButton type="button" onClick={() => pickPlayer(teamId, null)}>
+        <ScorerButton
+          type="button"
+          aria-pressed={isGoal ? scorer?.teamId === teamId && scorer.playerId === null : undefined}
+          onClick={() => pickPlayer(teamId, null)}
+        >
           <ShirtNumber>?</ShirtNumber>
           <span>{t(language, "console.unknownPlayer")}</span>
-        </PlayerButton>
+        </ScorerButton>
       )}
     </SquadColumn>
   );
 
-  return (
+  return createPortal(
     <SheetBackdrop
       role="dialog"
       aria-modal="true"
+      aria-labelledby="event-sheet-title"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
     >
       <Sheet onClick={(event) => event.stopPropagation()}>
-        <SheetHeader>
+        <SheetHeader style={{ flexWrap: "wrap" }}>
           <div>
-            <h3>{heading}</h3>
-            <small>{t(language, promptKey as never)}</small>
+            <h3 id="event-sheet-title">{heading}</h3>
+            <small>{t(language, promptKey)}</small>
           </div>
+          <MinutePanel>
+            <strong>{t(language, "console.eventMinute")}</strong>
+            <div>
+              {manualMinute === null ? (
+                <>
+                  <output aria-label={t(language, "console.liveMinute")}>{minute}′</output>
+                  <span style={{ fontSize: "0.78rem", color: "var(--text-secondary)" }}>{t(language, "console.liveMinute")}</span>
+                  <button type="button" className="minute-action" onClick={() => setManualMinute(minute)}>
+                    <Pencil size={14} />{t(language, "console.correctMinute")}
+                  </button>
+                </>
+              ) : (
+                <>
           <MinuteControl>
             <button
               type="button"
-              aria-label="-1"
-              onClick={() => setMinute((value) => Math.max(0, value - 1))}
+              aria-label={t(language, "console.minuteDecrease")}
+              onClick={() => setManualMinute(Math.max(0, minute - 1))}
             >
               −
             </button>
@@ -227,28 +337,32 @@ const EventSheet = ({
               value={minute}
               min={0}
               max={200}
-              aria-label={t(language, "console.minuteLabel", {
-                minute,
-              })}
+              aria-label={t(language, "console.eventMinute")}
               onChange={(event) => {
                 const next = Number(event.target.value);
                 if (!Number.isNaN(next)) {
-                  setMinute(Math.min(200, Math.max(0, next)));
+                  setManualMinute(Math.min(200, Math.max(0, next)));
                 }
               }}
             />
             <button
               type="button"
-              aria-label="+1"
-              onClick={() => setMinute((value) => Math.min(200, value + 1))}
+              aria-label={t(language, "console.minuteIncrease")}
+              onClick={() => setManualMinute(Math.min(200, minute + 1))}
             >
               +
             </button>
           </MinuteControl>
+                  <button type="button" className="minute-action" onClick={() => setManualMinute(null)}>{t(language, "console.useLiveMinute")}</button>
+                </>
+              )}
+            </div>
+            {manualMinute !== null && <small>{t(language, "console.minuteCorrectionHint")}</small>}
+          </MinutePanel>
         </SheetHeader>
 
         <SheetBody>
-          {isOwnGoal && !scorer && (
+          {isOwnGoal && (
             <div style={{ marginBottom: 12 }}>
               <Banner $tone="warning">
                 <span>
@@ -259,36 +373,41 @@ const EventSheet = ({
             </div>
           )}
 
-          {isGoal && !scorer && (
-            <AssistToggle
-              checked={wantsAssist}
-              onChange={setWantsAssist}
-              label={t(language, "console.pickAssist")}
-            />
-          )}
-
-          {scorer ? (
-            <SquadColumn>
-              {assistCandidates.map((player) => (
-                <PlayerButton
-                  key={player.id}
-                  type="button"
-                  onClick={() =>
-                    submit(scorer.teamId, scorer.playerId, player.id)
-                  }
-                >
-                  <ShirtNumber>
-                    {player.shirtNumber !== null &&
-                    player.shirtNumber !== undefined
-                      ? player.shirtNumber
-                      : "–"}
-                  </ShirtNumber>
-                  <span style={{ overflowWrap: "anywhere" }}>
-                    {player.name}
-                  </span>
-                </PlayerButton>
-              ))}
-            </SquadColumn>
+          {showGoalDetails ? (
+            <>
+              <ScorerSummary>
+                <SquadLabel $color={scorer.teamId === match.homeTeamId ? match.homeTeamColor : match.awayTeamColor}>
+                  {scorer.teamId === match.homeTeamId ? match.homeTeamName : match.awayTeamName}
+                </SquadLabel>
+                <strong>{t(language, "console.selectedScorer", { player: scorerName })}</strong>
+              </ScorerSummary>
+              <AssistOptions>
+                <legend>{t(language, "console.pickAssist")}</legend>
+                <p>{t(language, "console.assistHint")}</p>
+                <AssistOption $selected={selectedAssistId === null}>
+                  <input
+                    type="radio"
+                    name="goal-assist"
+                    checked={selectedAssistId === null}
+                    onChange={() => setAssistPlayerId(null)}
+                  />
+                  <span>{t(language, "console.skipAssist")}</span>
+                </AssistOption>
+                {assistCandidates.map((player) => (
+                  <AssistOption key={player.id} $selected={selectedAssistId === player.id}>
+                    <input
+                      type="radio"
+                      name="goal-assist"
+                      checked={selectedAssistId === player.id}
+                      onChange={() => setAssistPlayerId(player.id)}
+                    />
+                    <ShirtNumber>{player.shirtNumber ?? "–"}</ShirtNumber>
+                    <span style={{ overflowWrap: "anywhere" }}>{player.name}</span>
+                  </AssistOption>
+                ))}
+                {assistCandidates.length === 0 && <p>{t(language, "console.noAssistCandidates")}</p>}
+              </AssistOptions>
+            </>
           ) : (
             <SquadColumns>
               {renderSquad(
@@ -307,25 +426,36 @@ const EventSheet = ({
           )}
         </SheetBody>
 
-        <SheetFooter>
-          {scorer ? (
-            <BigButton
-              type="button"
-              $tone="accent"
-              onClick={() => submit(scorer.teamId, scorer.playerId, null)}
-            >
-              <Check size={18} />
-              {t(language, "console.skipAssist")}
-            </BigButton>
-          ) : (
+        {showGoalDetails ? (
+          <GoalFooter>
+            <small aria-live="polite">
+              {selectedAssist
+                ? t(language, "console.selectedAssist", { player: selectedAssist.name })
+                : t(language, "console.skipAssist")}
+            </small>
+            <div>
+              <BigButton type="button" $tone="neutral" onClick={() => setChoosingScorer(true)}>
+                <ArrowLeft size={18} />{t(language, "console.backToScorer")}
+              </BigButton>
+              <BigButton
+                type="button"
+                onClick={() => submit(scorer.teamId, scorer.playerId, selectedAssistId)}
+              >
+                <Check size={18} />{t(language, "console.saveGoal")}
+              </BigButton>
+            </div>
+          </GoalFooter>
+        ) : (
+          <SheetFooter>
             <BigButton type="button" $tone="neutral" onClick={onClose}>
               <X size={18} />
               {t(language, "common.cancel")}
             </BigButton>
-          )}
-        </SheetFooter>
+          </SheetFooter>
+        )}
       </Sheet>
-    </SheetBackdrop>
+    </SheetBackdrop>,
+    document.body
   );
 };
 

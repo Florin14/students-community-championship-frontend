@@ -1,7 +1,5 @@
 import axios from "axios";
 
-import { AUTH_STORAGE_KEY } from "../utils/storageKeys";
-
 // Resolution order, most specific first:
 //   1. runtime-config.js, written by the container at start-up - this is what
 //      lets a single image be deployed to every environment.
@@ -20,22 +18,46 @@ const api = axios.create({
   headers: { "Content-Type": "application/json" },
 });
 
-api.interceptors.request.use((config) => {
-  if (config.url?.includes("/auth/login")) {
-    return config;
-  }
-  try {
-    const raw = localStorage.getItem(AUTH_STORAGE_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as { accessToken?: string };
-      if (parsed.accessToken) {
-        config.headers.Authorization = `Bearer ${parsed.accessToken}`;
-      }
+interface ApiAuthHandlers {
+  getAccessToken: () => string | null;
+  onUnauthorized: () => void;
+}
+
+export const setupAuthInterceptors = ({
+  getAccessToken,
+  onUnauthorized,
+}: ApiAuthHandlers) => {
+  api.interceptors.request.use((config) => {
+    if (config.url === "/auth/login") {
+      return config;
     }
-  } catch {
-    // storage unavailable - request goes out unauthenticated
-  }
-  return config;
-});
+    const accessToken = getAccessToken();
+    if (accessToken) {
+      config.headers.Authorization = `Bearer ${accessToken}`;
+    }
+    return config;
+  });
+
+  api.interceptors.response.use(
+    (response) => response,
+    (error: unknown) => {
+      if (
+        axios.isAxiosError(error) &&
+        error.response?.status === 401 &&
+        error.config?.url !== "/auth/login"
+      ) {
+        const accessToken = getAccessToken();
+        // A late response from an old session must not log out a new session.
+        if (
+          accessToken &&
+          error.config?.headers.get("Authorization") === `Bearer ${accessToken}`
+        ) {
+          onUnauthorized();
+        }
+      }
+      return Promise.reject(error);
+    }
+  );
+};
 
 export default api;

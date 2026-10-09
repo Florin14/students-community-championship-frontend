@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 const Strip = styled.div`
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 8px;
   padding: 20px 8px;
 

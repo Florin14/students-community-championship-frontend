@@ -1,4 +1,4 @@
-import { BarChart3, Flame, Goal, ShieldAlert, TrendingUp } from "lucide-react";
+import { BarChart3, Flame, Goal, ShieldAlert, ShieldCheck, TrendingUp, Users } from "lucide-react";
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -27,20 +27,18 @@ import {
   fetchTopScorers,
 } from "../store/slices/thunks/statsThunks";
 import type { TopPlayer } from "../types";
+import AudienceStats from "./stats/AudienceStats";
 
 const StatsGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   margin-bottom: 28px;
 
   @media (max-width: 980px) {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  @media (max-width: 520px) {
-    grid-template-columns: 1fr;
-  }
 `;
 
 const ChartsRow = styled.div`
@@ -242,6 +240,15 @@ const Stats = () => {
           label={t(language, "stats.redCards")}
           tone="danger"
         />
+      </StatsGrid>
+
+      <AudienceStats seasonId={seasonId} />
+
+      <SectionHeading title={t(language, "attendance.seasonTitle")} subtitle={t(language, "attendance.seasonHint")} />
+      <StatsGrid>
+        <StatCard icon={ShieldCheck} value={overview?.attendances ?? "—"} label={t(language, "attendance.seasonChecks")} />
+        <StatCard icon={Users} value={overview?.attendancePlayers ?? "—"} label={t(language, "attendance.uniquePlayers")} />
+        <StatCard icon={BarChart3} value={overview?.attendanceMatches ?? "—"} label={t(language, "attendance.matches")} />
       </StatsGrid>
 
       <ChartsRow>

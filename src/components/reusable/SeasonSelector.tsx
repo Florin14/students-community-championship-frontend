@@ -7,12 +7,14 @@ import StyledSelect from "./StyledSelect";
 
 interface SeasonSelectorProps {
   minWidth?: number;
+  requireSelection?: boolean;
+  disabled?: boolean;
 }
 
-const SeasonSelector = ({ minWidth = 220 }: SeasonSelectorProps) => {
+const SeasonSelector = ({ minWidth = 220, requireSelection = false, disabled = false }: SeasonSelectorProps) => {
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
-  const { seasons, selectedSeasonId } = useAppSelector(
+  const { seasons, selectedSeasonId, activeSeason } = useAppSelector(
     (state) => state.seasons
   );
 
@@ -21,7 +23,8 @@ const SeasonSelector = ({ minWidth = 220 }: SeasonSelectorProps) => {
   return (
     <StyledSelect
       size="small"
-      value={selectedSeasonId ?? ""}
+      value={selectedSeasonId ?? (requireSelection ? activeSeason?.id : undefined) ?? ""}
+      disabled={disabled}
       onChange={(event) =>
         dispatch(
           setSelectedSeasonId(
@@ -32,7 +35,7 @@ const SeasonSelector = ({ minWidth = 220 }: SeasonSelectorProps) => {
       displayEmpty
       sx={{ minWidth }}
     >
-      <MenuItem value="">{t(language, "season.all")}</MenuItem>
+      <MenuItem value="" disabled={requireSelection}>{t(language, requireSelection ? "attendance.chooseSeason" : "season.all")}</MenuItem>
       {seasons.map((season) => (
         <MenuItem key={season.id} value={season.id}>
           {season.name}

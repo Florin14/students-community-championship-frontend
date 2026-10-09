@@ -22,7 +22,18 @@ const loadStoredAuth = (): StoredAuth | null => {
     const raw = localStorage.getItem(AUTH_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as StoredAuth;
-    if (parsed?.accessToken && parsed?.user) return parsed;
+    if (parsed?.accessToken && parsed?.user) {
+      // Existing staff sessions keep their token and account after the role merge.
+      if (String(parsed.user.role) === "VOLUNTEER") {
+        parsed.user.role = "OPERATOR";
+        try {
+          localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(parsed));
+        } catch {
+          // Use the migrated session even if storage cannot be updated.
+        }
+      }
+      return parsed;
+    }
   } catch {
     // storage unavailable or corrupted
   }

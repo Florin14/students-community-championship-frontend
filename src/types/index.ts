@@ -47,7 +47,19 @@ export interface ChangePasswordPayload {
 
 // --- Season ---------------------------------------------------------------
 
+export type CalendarPhase = "LEAGUE" | "ACADEMIC_BREAK" | "PLAY_OFF" | "FINAL_STAGES" | "SEMIFINALS" | "FINAL";
+
+export interface SeasonCalendarPeriod {
+  startDate: string;
+  endDate: string;
+  label: string;
+  phase: CalendarPhase;
+  round: number | null;
+  isBreak: boolean;
+}
+
 export interface Season {
+  calendar?: SeasonCalendarPeriod[];
   id: number;
   name: string;
   description?: string | null;
@@ -59,6 +71,7 @@ export interface Season {
 }
 
 export interface SeasonPayload {
+  calendar?: SeasonCalendarPeriod[];
   name: string;
   description?: string | null;
   startDate?: string | null;
@@ -73,6 +86,7 @@ export interface Team {
   name: string;
   shortName?: string | null;
   faculty?: string | null;
+  university?: string | null;
   description?: string | null;
   color?: string | null;
   logo?: string | null;
@@ -83,6 +97,7 @@ export interface TeamPayload {
   name: string;
   shortName?: string | null;
   faculty?: string | null;
+  university?: string | null;
   description?: string | null;
   color?: string | null;
   logo?: string | null;
@@ -91,6 +106,7 @@ export interface TeamPayload {
 // --- Player -----------------------------------------------------------------
 
 export interface Player {
+  attendanceCount: number;
   id: number;
   name: string;
   position?: PlayerPosition | null;
@@ -107,10 +123,10 @@ export interface Player {
 }
 
 export interface PlayerPayload {
+  avatar: string;
   name: string;
   position?: PlayerPosition | null;
   shirtNumber?: number | null;
-  avatar?: string | null;
   teamId?: number | null;
 }
 
@@ -156,6 +172,11 @@ export interface MatchEvent {
 }
 
 export interface Match {
+  calendarLabel?: string | null;
+  attendanceHome: number;
+  attendanceAway: number;
+  attendanceTotal: number;
+  audience?: number | null;
   id: number;
   seasonId: number;
   seasonName?: string | null;
@@ -211,6 +232,7 @@ export interface LiveMatchesResponse {
 }
 
 export interface MatchPayload {
+  audience?: number | null;
   seasonId: number;
   homeTeamId: number;
   awayTeamId: number;
@@ -222,6 +244,7 @@ export interface MatchPayload {
 }
 
 export interface MatchUpdatePayload {
+  audience?: number | null;
   round?: number | null;
   homeTeamId?: number;
   awayTeamId?: number;
@@ -351,6 +374,13 @@ export interface GoalsPerRound {
 }
 
 export interface StatsOverview {
+  audienceTotal: number;
+  audienceMatches: number;
+  audienceAverage: number | null;
+  audienceMax: number | null;
+  attendances: number;
+  attendancePlayers: number;
+  attendanceMatches: number;
   teams: number;
   players: number;
   matchesPlayed: number;
@@ -362,4 +392,21 @@ export interface StatsOverview {
   topScorerName?: string | null;
   topScorerTeamName?: string | null;
   topScorerGoals: number;
+}
+
+export interface AudienceMatch {
+  matchId: number;
+  timestamp: string;
+  round: number | null;
+  homeTeamName: string;
+  awayTeamName: string;
+  audience: number;
+}
+
+export interface AudienceStatistics {
+  totalSpectators: number;
+  matchesWithAudience: number;
+  averageSpectators: number | null;
+  maxSpectators: number | null;
+  data: AudienceMatch[];
 }

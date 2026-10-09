@@ -1,7 +1,7 @@
 import { createAsyncThunk } from "@reduxjs/toolkit";
 
 import api from "../../../api/config";
-import type { GoalsPerRound, StatsOverview, TopPlayer } from "../../../types";
+import type { AudienceStatistics, GoalsPerRound, StatsOverview, TopPlayer } from "../../../types";
 import { getErrorMessage } from "./thunkUtils";
 
 interface StatsParams {
@@ -53,6 +53,21 @@ export const fetchOverview = createAsyncThunk<
     return thunkAPI.rejectWithValue(
       getErrorMessage(error, "Failed to fetch overview")
     );
+  }
+});
+
+export const fetchAudienceStats = createAsyncThunk<
+  AudienceStatistics,
+  StatsParams | void,
+  { rejectValue: string }
+>("stats/fetchAudience", async (params, thunkAPI) => {
+  try {
+    const response = await api.get<AudienceStatistics>("/stats/audience", {
+      params: params ?? {}, signal: thunkAPI.signal,
+    });
+    return response.data;
+  } catch {
+    return thunkAPI.rejectWithValue("stats.audienceError");
   }
 });
 

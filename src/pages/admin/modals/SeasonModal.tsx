@@ -19,7 +19,10 @@ import {
   fetchSeasons,
   updateSeasonThunk,
 } from "../../../store/slices/thunks/seasonsThunks";
-import type { Season } from "../../../types";
+import type { Season, SeasonCalendarPeriod } from "../../../types";
+import { calendar2026 } from "../../../utils/calendar2026";
+import { calendarError } from "../../../utils/scheduling";
+import SeasonCalendarEditor from "./SeasonCalendarEditor";
 import { FieldGrid, FullRow } from "../adminUi";
 
 interface SeasonModalProps {
@@ -38,6 +41,7 @@ const SeasonModal = ({ open, season, onClose }: SeasonModalProps) => {
   const [endDate, setEndDate] = useState("");
   const [isActive, setIsActive] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [calendar, setCalendar] = useState<SeasonCalendarPeriod[]>([]);
 
   useEffect(() => {
     if (open) {
@@ -46,11 +50,13 @@ const SeasonModal = ({ open, season, onClose }: SeasonModalProps) => {
       setStartDate(season?.startDate ?? "");
       setEndDate(season?.endDate ?? "");
       setIsActive(season?.isActive ?? false);
+      setCalendar(season?.calendar ?? []);
     }
   }, [open, season]);
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    if (calendarError(calendar)) return;
     setSaving(true);
     const payload = {
       name,
@@ -58,6 +64,7 @@ const SeasonModal = ({ open, season, onClose }: SeasonModalProps) => {
       startDate: startDate || null,
       endDate: endDate || null,
       isActive,
+      calendar,
     };
     const action = season
       ? await dispatch(updateSeasonThunk({ id: season.id, data: payload }))
@@ -88,7 +95,7 @@ const SeasonModal = ({ open, season, onClose }: SeasonModalProps) => {
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <form onSubmit={handleSubmit}>
         <DialogTitle sx={{ fontFamily: 'var(--font-heading)', fontWeight: 700 }}>
           {season
@@ -144,13 +151,21 @@ const SeasonModal = ({ open, season, onClose }: SeasonModalProps) => {
                 sx={{ color: "var(--text-secondary)" }}
               />
             </FullRow>
+            <FullRow>
+              <SeasonCalendarEditor periods={calendar} language={language} onChange={setCalendar} onTemplate={() => {
+                setCalendar(calendar2026());
+                if (!name.trim()) setName("2026–2027");
+                if (!startDate) setStartDate("2026-10-26");
+                if (!endDate) setEndDate("2027-05-15");
+              }} />
+            </FullRow>
           </FieldGrid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2.5 }}>
           <Button onClick={onClose} color="inherit">
             {t(language, "common.cancel")}
           </Button>
-          <Button type="submit" variant="contained" disabled={saving || !name}>
+          <Button type="submit" variant="contained" disabled={saving || !name.trim() || Boolean(calendarError(calendar))}>
             {t(language, "common.save")}
           </Button>
         </DialogActions>

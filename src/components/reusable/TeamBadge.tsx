@@ -38,13 +38,13 @@ interface TeamBadgeProps {
 const initialsOf = (name?: string | null, shortName?: string | null) => {
   if (shortName) return shortName.slice(0, 3).toUpperCase();
   if (!name) return "?";
-  return name
+  return name.trim()
     .split(/\s+/)
     .filter(Boolean)
     .slice(0, 2)
     .map((word) => word[0])
     .join("")
-    .toUpperCase();
+    .toUpperCase() || "?";
 };
 
 const TeamBadge = ({

@@ -14,6 +14,8 @@ import { Link, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import ConfirmDialog from "../../components/reusable/ConfirmDialog";
+import AudienceField from "../../components/reusable/AudienceField";
+import { isValidAudience } from "../../utils/audience";
 import LoadingState from "../../components/reusable/LoadingState";
 import StyledTextField from "../../components/reusable/StyledTextField";
 import { usePolling, useOnlineStatus } from "../../hooks/usePolling";
@@ -34,6 +36,7 @@ import {
   resumeMatchThunk,
   startMatchThunk,
   submitEvent,
+  updateAudienceThunk,
   undoLastEvent,
   voidEvent,
 } from "../../store/slices/thunks/liveScoringThunks";
@@ -89,7 +92,7 @@ const LifecycleRow = styled.div`
 /** How often an unsent action is retried while the connection is back. */
 const QUEUE_RETRY_MS = 5000;
 /** How often the clock display is recomputed. */
-const CLOCK_TICK_MS = 10000;
+const CLOCK_TICK_MS = 1000;
 
 const ScoringConsole = () => {
   const { matchId: matchIdParam } = useParams();
@@ -97,29 +100,45 @@ const ScoringConsole = () => {
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const user = useAppSelector((state) => state.auth.user);
-  const { match, events, queue, loading, busy, error } = useAppSelector(
+  const { match, clockSyncedAt, scoringRequestId, events, queue, loading, busy, audienceSaving, error } = useAppSelector(
     (state) => state.liveScoring
   );
   const allPlayers = useAppSelector((state) => state.players.players);
   const online = useOnlineStatus();
 
   const [sheetType, setSheetType] = useState<MatchEventType | null>(null);
+  const [confirmStart, setConfirmStart] = useState(false);
   const [confirmFinish, setConfirmFinish] = useState(false);
   const [reopenOpen, setReopenOpen] = useState(false);
   const [reopenReason, setReopenReason] = useState("");
   const [pendingVoid, setPendingVoid] = useState<MatchEvent | null>(null);
+  const [audience, setAudience] = useState("");
   // Bumped by the interval below purely to re-render the clock.
   const [, setClockTick] = useState(0);
-  const [loadedAt, setLoadedAt] = useState<number>(() => Date.now());
 
   const isSuperAdmin = covers(user?.role, "SUPER_ADMIN");
+
+  useEffect(() => {
+    setAudience(match?.audience == null ? "" : String(match.audience));
+  }, [match?.id, match?.audience]);
+
+  const saveAudience = async () => {
+    if (!match || match.id !== matchId || match.isLocked || busy || audienceSaving || !online || !isValidAudience(audience)) return;
+    const nextAudience = audience === "" ? null : Number(audience);
+    if (nextAudience === (match.audience ?? null)) return;
+    const action = await dispatch(updateAudienceThunk({
+      matchId, audience: nextAudience,
+    }));
+    if (updateAudienceThunk.fulfilled.match(action)) {
+      dispatch(showSnackbar({ message: t(language, "matches.audienceSaved"), severity: "success" }));
+    }
+  };
 
   useEffect(() => {
     if (!Number.isFinite(matchId)) return;
     dispatch(fetchScoringMatch({ id: matchId }));
     dispatch(fetchScoringEvents({ id: matchId }));
     dispatch(fetchPlayers());
-    setLoadedAt(Date.now());
     return () => {
       dispatch(resetScoring());
     };
@@ -162,6 +181,14 @@ const ScoringConsole = () => {
     immediate: false,
   });
 
+  usePolling(() => {
+    if (scoringRequestId === null) dispatch(fetchScoringMatch({ id: matchId }));
+  }, {
+    intervalMs: 10000,
+    enabled: online && Boolean(match?.startedAt) && !match?.isLocked,
+    immediate: false,
+  });
+
   // Computed on every render rather than memoised: `clockTick` advancing is
   // exactly what should recompute it, and the arithmetic is free.
   const displayMinute = (() => {
@@ -175,7 +202,7 @@ const ScoringConsole = () => {
     if (!match.isClockRunning) return match.currentMinute;
     // The server reported the minute when the match was loaded; carry it
     // forward locally rather than polling once a minute just for the clock.
-    const elapsed = Math.floor((Date.now() - loadedAt) / 60000);
+    const elapsed = Math.floor((Date.now() - (clockSyncedAt ?? Date.now())) / 60000);
     return match.currentMinute + Math.max(0, elapsed);
   })();
 
@@ -267,7 +294,6 @@ const ScoringConsole = () => {
     setConfirmFinish(false);
     const action = await dispatch(finishMatchThunk({ matchId }));
     if (finishMatchThunk.fulfilled.match(action)) {
-      setLoadedAt(Date.now());
       dispatch(fetchScoringEvents({ id: matchId }));
       dispatch(
         showSnackbar({
@@ -285,20 +311,18 @@ const ScoringConsole = () => {
     if (reopenMatchThunk.fulfilled.match(action)) {
       setReopenOpen(false);
       setReopenReason("");
-      setLoadedAt(Date.now());
     }
   };
 
-  const runLifecycle = async (
-    thunk:
-      | typeof startMatchThunk
-      | typeof pauseMatchThunk
-      | typeof resumeMatchThunk
-  ) => {
-    const action = await dispatch(thunk({ matchId }));
-    if (thunk.fulfilled.match(action)) {
-      setLoadedAt(Date.now());
-    }
+  const runStart = async () => {
+    if (!match || match.id !== matchId || match.isLocked || match.startedAt != null || !online || busy || audienceSaving) return;
+    setConfirmStart(false);
+    await dispatch(startMatchThunk({ matchId }));
+  };
+
+  const runLifecycle = async (thunk: typeof pauseMatchThunk | typeof resumeMatchThunk) => {
+    if (!online || busy || audienceSaving) return;
+    await dispatch(thunk({ matchId }));
   };
 
   if (loading && !match) return <LoadingState />;
@@ -348,7 +372,7 @@ const ScoringConsole = () => {
             <strong>{match.homeTeamName}</strong>
           </ScoreTeam>
           <ScoreValue>
-            {match.scoreHome ?? 0} : {match.scoreAway ?? 0}
+            {notStarted ? "—" : match.scoreHome ?? 0} : {notStarted ? "—" : match.scoreAway ?? 0}
           </ScoreValue>
           <ScoreTeam $align="right">
             <strong>{match.awayTeamName}</strong>
@@ -400,8 +424,8 @@ const ScoringConsole = () => {
             <div style={{ marginTop: 12 }}>
               <BigButton
                 type="button"
-                disabled={busy}
-                onClick={() => runLifecycle(startMatchThunk)}
+                disabled={!online || busy || audienceSaving}
+                onClick={() => setConfirmStart(true)}
               >
                 <Play size={18} />
                 {t(language, "console.start")}
@@ -470,7 +494,7 @@ const ScoringConsole = () => {
                 <BigButton
                   type="button"
                   $tone="neutral"
-                  disabled={busy}
+                  disabled={!online || busy || audienceSaving}
                   onClick={() => runLifecycle(resumeMatchThunk)}
                 >
                   <Play size={17} />
@@ -480,7 +504,7 @@ const ScoringConsole = () => {
                 <BigButton
                   type="button"
                   $tone="neutral"
-                  disabled={busy}
+                  disabled={!online || busy || audienceSaving}
                   onClick={() => runLifecycle(pauseMatchThunk)}
                 >
                   <Pause size={17} />
@@ -489,7 +513,7 @@ const ScoringConsole = () => {
               )}
               <BigButton
                 type="button"
-                disabled={busy || pending.length > 0}
+                disabled={busy || audienceSaving || pending.length > 0}
                 onClick={() => setConfirmFinish(true)}
               >
                 <Flag size={17} />
@@ -498,6 +522,24 @@ const ScoringConsole = () => {
             </LifecycleRow>
           </>
         )}
+      </ConsoleCard>
+
+      <ConsoleCard>
+        <SectionLabel>{t(language, "matches.audience")}</SectionLabel>
+        <form style={{ padding: 14, display: "grid", gap: 12 }} onSubmit={(event) => {
+          event.preventDefault();
+          void saveAudience();
+        }}>
+          <AudienceField value={audience} onChange={setAudience} disabled={match.isLocked || busy || audienceSaving} />
+          {!match.isLocked && (
+            <>
+              {!online && <Banner $tone="warning">{t(language, "matches.audienceOnline")}</Banner>}
+              <BigButton type="submit" $tone="neutral" disabled={!online || busy || audienceSaving || !isValidAudience(audience) || (audience === "" ? null : Number(audience)) === (match.audience ?? null)}>
+                {t(language, "matches.audienceSave")}
+              </BigButton>
+            </>
+          )}
+        </form>
       </ConsoleCard>
 
       <ConsoleCard>
@@ -523,6 +565,17 @@ const ScoringConsole = () => {
           onClose={() => setSheetType(null)}
         />
       )}
+
+      <ConfirmDialog
+        open={confirmStart && notStarted && !match.isLocked}
+        title={t(language, "console.startTitle")}
+        description={t(language, "console.startText")}
+        confirmLabel={t(language, "console.start")}
+        cancelLabel={t(language, "common.cancel")}
+        confirmDisabled={!online || busy || audienceSaving}
+        onConfirm={runStart}
+        onClose={() => setConfirmStart(false)}
+      />
 
       <ConfirmDialog
         open={confirmFinish}

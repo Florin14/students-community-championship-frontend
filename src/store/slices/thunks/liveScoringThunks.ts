@@ -63,6 +63,17 @@ export const fetchScoringMatch = createAsyncThunk<
   }
 });
 
+/** Background reminders have their own state so polling never blocks the console. */
+export const fetchMatchReminders = createAsyncThunk<Match[], void>(
+  "liveScoring/fetchReminders",
+  async (_arg, thunkAPI) => {
+    const response = await api.get<{ data: Match[] }>("/matches/mine", {
+      signal: thunkAPI.signal,
+    });
+    return response.data.data;
+  }
+);
+
 /** The full record, voided entries included, for the correction list. */
 export const fetchScoringEvents = createAsyncThunk<
   MatchEvent[],
@@ -144,6 +155,19 @@ export const voidEvent = createAsyncThunk<
 });
 
 type Lifecycle = "start" | "pause" | "resume" | "finish";
+
+export const updateAudienceThunk = createAsyncThunk<
+  { matchId: number; audience: number | null },
+  { matchId: number; audience: number | null },
+  { rejectValue: string }
+>("liveScoring/updateAudience", async ({ matchId, audience }, thunkAPI) => {
+  try {
+    const response = await api.put<MatchDetails>(`/matches/${matchId}/audience`, { audience });
+    return { matchId, audience: response.data.audience ?? null };
+  } catch (error: unknown) {
+    return thunkAPI.rejectWithValue(getErrorMessage(error, "Failed to save audience"));
+  }
+});
 
 const lifecycleThunk = (action: Lifecycle, fallback: string) =>
   createAsyncThunk<MatchDetails, { matchId: number }, { rejectValue: string }>(
