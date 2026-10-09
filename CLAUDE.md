@@ -99,6 +99,15 @@ different design rules from the rest of the app:
 Player photos are required when an admin creates or saves a player. The modal
 must show a readable image before enabling Save, including for legacy players.
 
+Player QR images encode an absolute link to the public player profile on the
+frontend origin. The signed attendance credential and season travel in the URL
+fragment; never render the raw JWT as the QR payload or put it in a query string.
+Profile links continue to attendance; login preserves pathname, search and hash.
+Attendance selects the credential season and verifies against the chosen match
+before explicit identity confirmation. Camera/image/manual scans accept both
+new profile links and legacy token-only cards. Re-download existing QR images
+after deploying this change; viewing a credential does not regenerate it.
+
 Attendance totals belong to each match and are shown in match cards/details,
 including counts for each team. The season total counts check-ins, not unique
 people. The home band shows total spectators instead of a global check-in count.

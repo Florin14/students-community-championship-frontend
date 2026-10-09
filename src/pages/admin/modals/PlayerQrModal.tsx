@@ -9,6 +9,7 @@ import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { clearPlayerQr } from "../../../store/slices/attendanceSlice";
 import { issuePlayerQr, revokePlayerQr } from "../../../store/slices/thunks/attendanceThunks";
 import type { Player } from "../../../types";
+import { createPlayerQrUrl } from "../../../utils/playerQr";
 
 interface Props { player: Player | null; onClose: () => void }
 
@@ -35,7 +36,7 @@ const PlayerQrModal = ({ player, onClose }: Props) => {
     setImage(""); setImageError(false);
     if (!qr) return;
     void import("@zxing/browser").then(({ BrowserQRCodeSvgWriter }) => {
-      const svg = new BrowserQRCodeSvgWriter().write(qr.token, 400, 400);
+      const svg = new BrowserQRCodeSvgWriter().write(createPlayerQrUrl(qr), 400, 400);
       const background = document.createElementNS("http://www.w3.org/2000/svg", "rect");
       background.setAttribute("width", "100%"); background.setAttribute("height", "100%");
       background.setAttribute("fill", "white"); svg.insertBefore(background, svg.firstChild);
@@ -71,6 +72,7 @@ const PlayerQrModal = ({ player, onClose }: Props) => {
             <>
               <img src={image} alt={t(language, "attendance.qrTitle")} width={320} height={320} style={{ maxWidth: "100%", height: "auto" }} />
               <strong>{qr.playerName} · {qr.teamName} · {qr.seasonName}</strong>
+              <Button component="a" href={createPlayerQrUrl(qr)}>{t(language, "attendance.openProfile")}</Button>
               <Button component="a" href={image} download={`scc-player-${qr.playerId}-season-${qr.seasonId}.svg`} variant="contained">{t(language, "attendance.download")}</Button>
             </>
           )}

@@ -1,7 +1,7 @@
 import { Alert, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, MenuItem, Stack } from "@mui/material";
 import { CheckCircle2, ClipboardCheck, RefreshCw, User } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../../components/reusable/EmptyState";
@@ -18,9 +18,11 @@ import { clearAttendance, clearAttendancePreview } from "../../store/slices/atte
 import { confirmPlayerAttendance, fetchMatchAttendance, scanPlayerQr, voidPlayerAttendance } from "../../store/slices/thunks/attendanceThunks";
 import { fetchMatches } from "../../store/slices/thunks/matchesThunks";
 import { fetchOverview } from "../../store/slices/thunks/statsThunks";
+import { setSelectedSeasonId } from "../../store/slices/seasonsSlice";
 import type { AttendanceRecord } from "../../types/attendance";
 import { formatDateTimeDot, parseApiDate } from "../../utils/dateFormat";
 import { imageSrc } from "../../utils/images";
+import { readPlayerQrHash } from "../../utils/playerQr";
 import { covers } from "../../utils/roles";
 import { AdminTable, TableWrap } from "../admin/adminUi";
 
@@ -41,12 +43,17 @@ const Photo = styled.img`
 
 const Attendance = () => {
   const dispatch = useAppDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const incomingQr = readPlayerQrHash(location.hash);
+  const linkedToken = incomingQr?.token ?? "";
+  const linkedSeasonId = incomingQr?.seasonId;
   const language = useAppSelector((state) => state.i18n.language);
   const user = useAppSelector((state) => state.auth.user);
   const { selectedSeasonId, activeSeason } = useAppSelector((state) => state.seasons);
   const { matches, loading: matchesLoading, error: matchesError } = useAppSelector((state) => state.matches);
   const { roster, preview, rosterLoading, rosterError, scanError, scanLoading, confirming } = useAppSelector((state) => state.attendance);
-  const seasonId = selectedSeasonId ?? activeSeason?.id;
+  const seasonId = linkedSeasonId ?? selectedSeasonId ?? activeSeason?.id;
   const [matchId, setMatchId] = useState<number | "">("");
   const [token, setToken] = useState("");
   const [verified, setVerified] = useState(false);
@@ -56,17 +63,23 @@ const Attendance = () => {
   const [reason, setReason] = useState("");
 
   useEffect(() => {
+    if (linkedSeasonId) dispatch(setSelectedSeasonId(linkedSeasonId));
+  }, [dispatch, linkedSeasonId]);
+
+  useEffect(() => {
     setMatchId(""); setToken(""); setVerified(false); setCorrection(null);
     dispatch(clearAttendance());
     if (seasonId) dispatch(fetchMatches({ seasonId }));
   }, [dispatch, seasonId]);
 
   useEffect(() => {
-    dispatch(clearAttendance()); setToken(""); setVerified(false); setCorrection(null);
+    dispatch(clearAttendance()); setToken(linkedToken); setVerified(false); setCorrection(null);
+    setPhotoReady(false); setPhotoError(false);
     if (!matchId) return;
     const request = dispatch(fetchMatchAttendance(matchId));
-    return () => { request.abort(); };
-  }, [dispatch, matchId]);
+    const scanRequest = linkedToken ? dispatch(scanPlayerQr({ matchId, token: linkedToken })) : null;
+    return () => { request.abort(); scanRequest?.abort(); };
+  }, [dispatch, matchId, linkedToken]);
 
   usePolling(() => {
     if (matchId) dispatch(fetchMatchAttendance(matchId));
@@ -98,6 +111,10 @@ const Attendance = () => {
       dispatch(fetchOverview(seasonId ? { seasonId } : undefined));
     }
   };
+  const nextPlayer = () => {
+    dispatch(clearAttendancePreview()); setToken(""); setVerified(false);
+    if (linkedToken) navigate({ pathname: location.pathname, search: location.search, hash: "" }, { replace: true });
+  };
   const seasonMatches = matches.filter((match) => match.seasonId === seasonId)
     .slice().sort((a, b) => a.timestamp.localeCompare(b.timestamp));
 
@@ -105,7 +122,8 @@ const Attendance = () => {
     <>
       <SectionHeading title={t(language, "attendance.title")} subtitle={t(language, "attendance.subtitle")} />
       <Stack direction="row" gap={2} flexWrap="wrap">
-        <SeasonSelector requireSelection disabled={busy} />
+        <SeasonSelector requireSelection disabled={busy || Boolean(linkedToken)} />
+        {linkedToken && !currentPreview && <Button disabled={busy} onClick={nextPlayer}>{t(language, "attendance.next")}</Button>}
         <Button component={Link} to="/admin/attendance/stats" startIcon={<ClipboardCheck size={20} />}>{t(language, "attendance.stats")}</Button>
       </Stack>
       {!seasonId && <Alert severity="info">{t(language, "attendance.noSeason")}</Alert>}
@@ -130,14 +148,15 @@ const Attendance = () => {
             <Card>
               <SectionHeading title={t(language, "attendance.progress", { present: currentRoster.presentCount, total: currentRoster.totalPlayers })} />
               {!canConfirm && <Alert severity="info" sx={{ mb: 2 }}>{t(language, "attendance.closed")}</Alert>}
-              {!currentPreview && <>
+              {scanLoading && <LoadingState />}
+              {!currentPreview && !linkedToken && <>
               <QrScanner key={matchId} disabled={busy || !canConfirm} onScan={scan} />
               <Stack component="form" gap={2} sx={{ mt: 2 }} onSubmit={(event) => { event.preventDefault(); scan(token); }}>
                 <StyledTextField label={t(language, "attendance.code")} helperText={t(language, "attendance.codeHint")} value={token} onChange={(event) => { setToken(event.target.value); dispatch(clearAttendancePreview()); setVerified(false); }} disabled={busy || !canConfirm} fullWidth />
                 <Button type="submit" variant="outlined" disabled={busy || !canConfirm || token.trim().length < 20} sx={{ minHeight: 48 }}>{t(language, scanLoading ? "attendance.scanning" : "attendance.scan")}</Button>
               </Stack>
               </>}
-              {scanError && <Alert severity="error" sx={{ mt: 2 }}>{t(language, scanError)}</Alert>}
+              {scanError && <Alert severity="error" sx={{ mt: 2 }} action={linkedToken && <Button color="inherit" disabled={busy} onClick={() => scan(linkedToken)}>{t(language, "attendance.refresh")}</Button>}>{t(language, scanError)}</Alert>}
               {currentPreview && (
                 <Stack spacing={2} sx={{ mt: 3 }}>
                   <h2>{t(language, "attendance.profile")}</h2>
@@ -163,7 +182,7 @@ const Attendance = () => {
                       <Button variant="contained" size="large" startIcon={<CheckCircle2 size={22} />} disabled={!verified || !photoReady || busy || !canConfirm || !currentPreview.canConfirm} onClick={() => void confirm()} sx={{ minHeight: 56 }}>{t(language, confirming ? "attendance.confirming" : "attendance.confirm")}</Button>
                     </>
                   )}
-                  <Button disabled={busy} onClick={() => { dispatch(clearAttendancePreview()); setToken(""); setVerified(false); }}>{t(language, "attendance.next")}</Button>
+                  <Button disabled={busy} onClick={nextPlayer}>{t(language, "attendance.next")}</Button>
                 </Stack>
               )}
             </Card>
