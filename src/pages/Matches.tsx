@@ -9,6 +9,7 @@ import LoadingState from "../components/reusable/LoadingState";
 import MatchCard from "../components/reusable/MatchCard";
 import CompetitionCalendar from "../components/reusable/CompetitionCalendar";
 import StyledSelect from "../components/reusable/StyledSelect";
+import TeamIdentity from "../components/reusable/TeamIdentity";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchMatches } from "../store/slices/thunks/matchesThunks";
@@ -187,7 +188,7 @@ const Matches = () => {
           <MenuItem value="">{t(language, "matches.allTeams")}</MenuItem>
           {teams.map((team) => (
             <MenuItem key={team.id} value={team.id}>
-              {team.name}
+              <TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />
             </MenuItem>
           ))}
         </StyledSelect>

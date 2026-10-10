@@ -7,6 +7,7 @@ import LoadingState from "../components/reusable/LoadingState";
 import MatchTimeline from "../components/reusable/MatchTimeline";
 import TeamBadge from "../components/reusable/TeamBadge";
 import { usePolling } from "../hooks/usePolling";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchLiveMatches } from "../store/slices/thunks/liveThunks";
@@ -98,6 +99,7 @@ const Clock = styled.span`
  */
 const LiveScores = () => {
   const dispatch = useAppDispatch();
+  const { linkState } = usePageNavigation();
   const language = useAppSelector((state) => state.i18n.language);
   const { matches, ready } = useAppSelector((state) => state.live);
 
@@ -119,7 +121,7 @@ const LiveScores = () => {
         <Grid>
           {matches.map((match) => (
             <MatchBlock key={match.id}>
-              <Board to={`/matches/${match.id}`}>
+              <Board to={`/matches/${match.id}`} state={linkState}>
                 <Side $align="left">
                   <TeamBadge
                     name={match.homeTeamName}

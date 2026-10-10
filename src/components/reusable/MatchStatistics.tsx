@@ -2,6 +2,7 @@ import styled from "styled-components";
 
 import { t, type Language } from "../../i18n";
 import type { MatchDetails } from "../../types";
+import TeamIdentity from "./TeamIdentity";
 
 const Table = styled.table`
   width: 100%;
@@ -43,7 +44,7 @@ const MatchStatistics = ({ match, language }: { match: MatchDetails; language: L
   ] as const;
   return (
     <Table aria-label={t(language, "matchDetails.statistics")}>
-      <thead><tr><th scope="col">{match.homeTeamName}</th><th scope="col">{t(language, "matchDetails.statistics")}</th><th scope="col">{match.awayTeamName}</th></tr></thead>
+      <thead><tr><th scope="col"><TeamIdentity teamId={match.homeTeamId} name={match.homeTeamName} logo={match.homeTeamLogo} color={match.homeTeamColor} linked /></th><th scope="col">{t(language, "matchDetails.statistics")}</th><th scope="col"><TeamIdentity teamId={match.awayTeamId} name={match.awayTeamName} logo={match.awayTeamLogo} color={match.awayTeamColor} linked /></th></tr></thead>
       <tbody>{rows.map((row) => <tr key={row.label}><td>{row.home}</td><th scope="row">{t(language, row.label)}</th><td>{row.away}</td></tr>)}</tbody>
     </Table>
   );

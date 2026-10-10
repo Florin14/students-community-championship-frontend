@@ -11,6 +11,8 @@ import SectionHeading from "../../components/reusable/SectionHeading";
 import StatCard from "../../components/reusable/StatCard";
 import StyledSelect from "../../components/reusable/StyledSelect";
 import StyledTextField from "../../components/reusable/StyledTextField";
+import TeamIdentity from "../../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 import { t } from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchAttendanceStats } from "../../store/slices/thunks/attendanceThunks";
@@ -35,6 +37,7 @@ const AttendanceStats = () => {
   const [teamId, setTeamId] = useState<number | "">("");
   const [search, setSearch] = useState("");
   const seasonId = selectedSeasonId ?? activeSeason?.id;
+  const { linkState, backLinkProps, backLabel } = usePageNavigation("/admin/attendance", "attendance.back");
   useEffect(() => { dispatch(fetchTeams()); }, [dispatch]);
   useEffect(() => {
     if (!seasonId) return;
@@ -49,9 +52,9 @@ const AttendanceStats = () => {
         <SeasonSelector requireSelection />
         <StyledSelect value={teamId} displayEmpty onChange={(event) => setTeamId(event.target.value === "" ? "" : Number(event.target.value))}>
           <MenuItem value="">{t(language, "attendance.allTeams")}</MenuItem>
-          {teams.map((team) => <MenuItem value={team.id} key={team.id}>{team.name}</MenuItem>)}
+          {teams.map((team) => <MenuItem value={team.id} key={team.id}><TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} /></MenuItem>)}
         </StyledSelect>
-        <Button component={Link} to="/admin/attendance">{t(language, "attendance.back")}</Button>
+        <Button component={Link} {...backLinkProps}>{backLabel}</Button>
       </Stack>
       {!seasonId && <Alert severity="info">{t(language, "attendance.noSeason")}</Alert>}
       {statsLoading && <LoadingState />}
@@ -71,7 +74,7 @@ const AttendanceStats = () => {
                   <thead><tr><th>{t(language, "attendance.player")}</th><th>{t(language, "attendance.team")}</th><th>{t(language, "attendance.presences")}</th><th>{t(language, "attendance.lastPresence")}</th></tr></thead>
                   <tbody>{rows.map((player) => (
                     <tr key={player.playerId}>
-                      <td>{player.name}</td><td>{player.teamName ?? "—"}</td><td>{player.presences}</td><td>{player.lastPresentAt ? formatDateTimeDot(parseApiDate(player.lastPresentAt)) : "—"}</td>
+                      <td><Link to={`/players/${player.playerId}`} state={linkState}>{player.name}</Link></td><td><TeamIdentity teamId={player.teamId} name={player.teamName} linked /></td><td>{player.presences}</td><td>{player.lastPresentAt ? formatDateTimeDot(parseApiDate(player.lastPresentAt)) : "—"}</td>
                     </tr>
                   ))}</tbody>
                 </AdminTable>

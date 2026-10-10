@@ -2,6 +2,7 @@ import { Alert, Button } from "@mui/material";
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
+import TeamIdentity from "./reusable/TeamIdentity";
 
 import { useOnlineStatus, usePolling } from "../hooks/usePolling";
 import { t } from "../i18n";
@@ -75,11 +76,12 @@ const LiveMatchReminder = ({ userId }: { userId: number }) => {
     <Notice>
       <Alert severity="warning" onClose={dismiss} closeText={t(language, "console.reminderDismiss")}>
         <strong>{t(language, "console.reminderTitle")}</strong>
-        {t(language, "console.reminderText", {
-          home: reminder.match.homeTeamName ?? "—",
-          away: reminder.match.awayTeamName ?? "—",
-          minutes: reminder.minutes,
-        })}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center", marginBottom: 8 }}>
+          <TeamIdentity teamId={reminder.match.homeTeamId} name={reminder.match.homeTeamName} logo={reminder.match.homeTeamLogo} color={reminder.match.homeTeamColor} />
+          <span>–</span>
+          <TeamIdentity teamId={reminder.match.awayTeamId} name={reminder.match.awayTeamName} logo={reminder.match.awayTeamLogo} color={reminder.match.awayTeamColor} />
+        </div>
+        {t(language, "console.reminderTime", { minutes: reminder.minutes })}
         <div style={{ marginTop: 10 }}>
           <Button component={Link} to={`/admin/live/${reminder.match.id}`} size="small">
             {t(language, "console.reminderOpen")}

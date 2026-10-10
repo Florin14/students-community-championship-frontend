@@ -11,6 +11,7 @@ import SectionHeading from "../components/reusable/SectionHeading";
 import TeamBadge from "../components/reusable/TeamBadge";
 import type { PlayerPosition } from "../types";
 import { t } from "../i18n";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchMatches } from "../store/slices/thunks/matchesThunks";
 import { fetchPlayers } from "../store/slices/thunks/playersThunks";
@@ -211,6 +212,7 @@ const TeamDetails = () => {
   );
 
   const seasonId = selectedSeasonId ?? activeSeason?.id;
+  const { linkState, backLinkProps, backLabel } = usePageNavigation("/teams", "teamDetails.back");
 
   useEffect(() => {
     if (!Number.isFinite(teamId)) return;
@@ -259,9 +261,9 @@ const TeamDetails = () => {
   if (!selectedTeam || selectedTeam.id !== teamId) {
     return (
       <>
-        <BackLink to="/teams">
+        <BackLink {...backLinkProps}>
           <ArrowLeft size={15} />
-          {t(language, "teamDetails.back")}
+          {backLabel}
         </BackLink>
         <EmptyState icon={Users} title={t(language, "teamDetails.notFound")} />
       </>
@@ -270,9 +272,9 @@ const TeamDetails = () => {
 
   return (
     <>
-      <BackLink to="/teams">
+      <BackLink {...backLinkProps}>
         <ArrowLeft size={15} />
-        {t(language, "teamDetails.back")}
+        {backLabel}
       </BackLink>
 
       <HeaderCard
@@ -343,7 +345,7 @@ const TeamDetails = () => {
               <PositionGroup key={group.position ?? "unspecified"}>
                 <h3>{t(language, `positionGroup.${group.position ?? "UNSPECIFIED"}`)}</h3>
                 {group.players.map((player) => (
-              <RosterRow key={player.id} to={`/players/${player.id}`}>
+              <RosterRow key={player.id} to={`/players/${player.id}`} state={linkState}>
                 <ShirtNumber>
                   {player.shirtNumber !== null &&
                   player.shirtNumber !== undefined

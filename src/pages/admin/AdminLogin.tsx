@@ -10,6 +10,7 @@ import { t } from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { clearAuthError } from "../../store/slices/authSlice";
 import { loginThunk } from "../../store/slices/thunks/authThunks";
+import { covers } from "../../utils/roles";
 
 const Wrapper = styled.div`
   display: flex;
@@ -60,7 +61,7 @@ const AdminLogin = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const language = useAppSelector((state) => state.i18n.language);
-  const { isAuthenticated, loading, error } = useAppSelector(
+  const { isAuthenticated, user, loading, error } = useAppSelector(
     (state) => state.auth
   );
 
@@ -69,12 +70,14 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const from =
-    (location.state as { from?: { pathname: string; search?: string; hash?: string } } | null)?.from;
-  const destination = from ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}` : "/admin";
+    (location.state as { from?: { pathname: string; search?: string; hash?: string; state?: unknown } } | null)?.from;
+  const home = covers(user?.role, "ADMIN") ? "/admin" : covers(user?.role, "OPERATOR") ? "/admin/live" : "/";
+  const canReturn = from?.pathname.startsWith("/") && !from.pathname.startsWith("//") && from.pathname !== "/admin/login";
+  const destination = from && canReturn ? `${from.pathname}${from.search ?? ""}${from.hash ?? ""}` : home;
 
   useEffect(() => {
-    if (isAuthenticated) navigate(destination, { replace: true });
-  }, [isAuthenticated, navigate, destination]);
+    if (isAuthenticated) navigate(destination, { replace: true, state: from?.state });
+  }, [isAuthenticated, navigate, destination, from?.state]);
 
   useEffect(() => {
     return () => {

@@ -1,16 +1,19 @@
-import { Alert, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, MenuItem, Stack } from "@mui/material";
+import { Alert, Button, Checkbox, Chip, Dialog, DialogActions, DialogContent, DialogTitle, FormControlLabel, MenuItem, Stack, Tab, Tabs } from "@mui/material";
 import { CheckCircle2, ClipboardCheck, RefreshCw, User } from "lucide-react";
-import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../../components/reusable/EmptyState";
+import ExpandablePlayerPhoto from "../../components/reusable/ExpandablePlayerPhoto";
 import LoadingState from "../../components/reusable/LoadingState";
 import QrScanner from "../../components/reusable/QrScanner";
 import SeasonSelector from "../../components/reusable/SeasonSelector";
 import SectionHeading from "../../components/reusable/SectionHeading";
 import StyledSelect from "../../components/reusable/StyledSelect";
 import StyledTextField from "../../components/reusable/StyledTextField";
+import TeamIdentity from "../../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 import { usePolling } from "../../hooks/usePolling";
 import { t } from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -33,11 +36,10 @@ const Card = styled.section`
   padding: 20px;
   margin: 20px 0;
 `;
-const Photo = styled.img`
+const Photo = styled(ExpandablePlayerPhoto)`
   width: 40%;
   max-width: 160px;
   height: 160px;
-  object-fit: cover;
   border-radius: 16px;
 `;
 
@@ -54,7 +56,12 @@ const Attendance = () => {
   const { matches, loading: matchesLoading, error: matchesError } = useAppSelector((state) => state.matches);
   const { roster, preview, rosterLoading, rosterError, scanError, scanLoading, confirming } = useAppSelector((state) => state.attendance);
   const seasonId = linkedSeasonId ?? selectedSeasonId ?? activeSeason?.id;
-  const [matchId, setMatchId] = useState<number | "">("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const requestedMatchId = Number(searchParams.get("matchId"));
+  const matchId = Number.isSafeInteger(requestedMatchId) && requestedMatchId > 0 ? requestedMatchId : "";
+  const rosterTeam = searchParams.get("team") === "away" ? "away" : "home";
+  const previousSeasonId = useRef(seasonId);
+  const { linkState } = usePageNavigation();
   const [token, setToken] = useState("");
   const [verified, setVerified] = useState(false);
   const [photoReady, setPhotoReady] = useState(false);
@@ -67,7 +74,14 @@ const Attendance = () => {
   }, [dispatch, linkedSeasonId]);
 
   useEffect(() => {
-    setMatchId(""); setToken(""); setVerified(false); setCorrection(null);
+    if (previousSeasonId.current !== seasonId) {
+      previousSeasonId.current = seasonId;
+      setSearchParams((params) => { params.delete("matchId"); params.delete("team"); return params; }, { replace: true });
+    }
+  }, [seasonId, setSearchParams]);
+
+  useEffect(() => {
+    setToken(""); setVerified(false); setCorrection(null);
     dispatch(clearAttendance());
     if (seasonId) dispatch(fetchMatches({ seasonId }));
   }, [dispatch, seasonId]);
@@ -117,6 +131,9 @@ const Attendance = () => {
   };
   const seasonMatches = matches.filter((match) => match.seasonId === seasonId)
     .slice().sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const currentMatch = seasonMatches.find((match) => match.id === matchId);
+  const rosterTeamId = rosterTeam === "home" ? currentMatch?.homeTeamId : currentMatch?.awayTeamId;
+  const teamRoster = currentRoster?.data.filter(({ player }) => player.teamId === rosterTeamId) ?? [];
 
   return (
     <>
@@ -124,18 +141,28 @@ const Attendance = () => {
       <Stack direction="row" gap={2} flexWrap="wrap">
         <SeasonSelector requireSelection disabled={busy || Boolean(linkedToken)} />
         {linkedToken && !currentPreview && <Button disabled={busy} onClick={nextPlayer}>{t(language, "attendance.next")}</Button>}
-        <Button component={Link} to="/admin/attendance/stats" startIcon={<ClipboardCheck size={20} />}>{t(language, "attendance.stats")}</Button>
+        <Button component={Link} to="/admin/attendance/stats" state={linkState} startIcon={<ClipboardCheck size={20} />}>{t(language, "attendance.stats")}</Button>
       </Stack>
       {!seasonId && <Alert severity="info">{t(language, "attendance.noSeason")}</Alert>}
       {matchesError && <Alert severity="error">{t(language, "attendance.errorGeneric")}</Alert>}
       {matchesLoading && seasonMatches.length === 0 && <LoadingState />}
       {seasonId && !matchesLoading && seasonMatches.length === 0 && !matchesError && <EmptyState icon={ClipboardCheck} title={t(language, "attendance.noMatches")} />}
       {seasonMatches.length > 0 && (
-        <StyledSelect fullWidth displayEmpty value={matchId} disabled={busy} sx={{ mt: 2 }} onChange={(event) => setMatchId(event.target.value === "" ? "" : Number(event.target.value))}>
+        <StyledSelect fullWidth displayEmpty value={matchId} disabled={busy} sx={{ mt: 2 }} onChange={(event) => setSearchParams((params) => {
+          if (event.target.value === "") params.delete("matchId");
+          else params.set("matchId", String(event.target.value));
+          params.delete("team");
+          return params;
+        })}>
           <MenuItem value="">{t(language, "attendance.chooseMatch")}</MenuItem>
           {seasonMatches.map((match) => (
             <MenuItem key={match.id} value={match.id}>
-              {formatDateTimeDot(parseApiDate(match.timestamp))} · {match.homeTeamName} / {match.awayTeamName}
+              <Stack direction="row" gap={1} alignItems="center" flexWrap="wrap">
+                <span>{formatDateTimeDot(parseApiDate(match.timestamp))} ·</span>
+                <TeamIdentity teamId={match.homeTeamId} name={match.homeTeamName} logo={match.homeTeamLogo} color={match.homeTeamColor} />
+                <span>/</span>
+                <TeamIdentity teamId={match.awayTeamId} name={match.awayTeamName} logo={match.awayTeamLogo} color={match.awayTeamColor} />
+              </Stack>
             </MenuItem>
           ))}
         </StyledSelect>
@@ -163,14 +190,14 @@ const Attendance = () => {
                   <Stack direction="row" gap={2} alignItems="center">
                     <Photo
                       src={imageSrc(currentPreview.player.avatar)}
-                      alt={currentPreview.player.name}
+                      name={currentPreview.player.name}
                       onLoad={() => setPhotoReady(true)}
                       onError={() => { setPhotoReady(false); setPhotoError(true); }}
                     />
                     <Stack spacing={1} sx={{ minWidth: 0 }}>
                       <h3>{currentPreview.player.name}</h3>
-                      <p>{currentPreview.player.teamName} {currentPreview.player.shirtNumber != null && `· #${currentPreview.player.shirtNumber}`}</p>
-                      <Button component={Link} to={`/players/${currentPreview.player.id}`} startIcon={<User size={18} />}>{t(language, "attendance.player")}</Button>
+                      <p><TeamIdentity teamId={currentPreview.player.teamId} name={currentPreview.player.teamName} linked /> {currentPreview.player.shirtNumber != null && `· #${currentPreview.player.shirtNumber}`}</p>
+                      <Button component={Link} to={`/players/${currentPreview.player.id}`} state={linkState} startIcon={<User size={18} />}>{t(language, "attendance.player")}</Button>
                     </Stack>
                   </Stack>
                   {photoError && <Alert severity="error">{t(language, "attendance.errorPhoto")}</Alert>}
@@ -187,26 +214,41 @@ const Attendance = () => {
               )}
             </Card>
           )}
-          {currentRoster && (
+          {currentRoster && currentMatch && (
             <Card>
               <Stack direction="row" justifyContent="space-between" alignItems="center">
                 <h2>{t(language, "attendance.roster")}</h2>
                 <Button startIcon={<RefreshCw size={18} />} onClick={() => dispatch(fetchMatchAttendance(matchId))}>{t(language, "attendance.refresh")}</Button>
               </Stack>
-              {currentRoster.data.length === 0 ? <EmptyState icon={User} title={t(language, "attendance.noPlayers")} /> : (
-                <TableWrap>
-                  <AdminTable>
-                    <thead><tr><th>{t(language, "attendance.player")}</th><th>{t(language, "attendance.team")}</th><th>{t(language, "attendance.status")}</th>{covers(user?.role, "ADMIN") && <th />}</tr></thead>
-                    <tbody>{currentRoster.data.map(({ player, attendance, isPresent }) => (
-                      <tr key={player.id}>
-                        <td><Link to={`/players/${player.id}`}>{player.name}</Link></td><td>{player.teamName}</td>
-                        <td><Chip label={t(language, isPresent ? "attendance.present" : "attendance.absent")} color={isPresent ? "success" : "default"} size="small" /></td>
-                        {covers(user?.role, "ADMIN") && <td>{isPresent && attendance && canConfirm && <Button disabled={busy} onClick={() => { setCorrection(attendance); setReason(""); }}>{t(language, "attendance.correct")}</Button>}</td>}
-                      </tr>
-                    ))}</tbody>
-                  </AdminTable>
-                </TableWrap>
-              )}
+              <Tabs
+                value={rosterTeam}
+                onChange={(_, value: "home" | "away") => setSearchParams((params) => { params.set("team", value); return params; }, { replace: true })}
+                aria-label={t(language, "attendance.roster")}
+                variant="scrollable"
+                scrollButtons="auto"
+                allowScrollButtonsMobile
+                selectionFollowsFocus
+                sx={{ mt: 1, mb: 2, borderBottom: 1, borderColor: "divider" }}
+              >
+                <Tab id="attendance-roster-tab-home" value="home" label={<TeamIdentity teamId={currentMatch.homeTeamId} name={currentMatch.homeTeamName ?? t(language, "admin.matches.homeTeam")} logo={currentMatch.homeTeamLogo} color={currentMatch.homeTeamColor} />} aria-controls="attendance-roster-panel" />
+                <Tab id="attendance-roster-tab-away" value="away" label={<TeamIdentity teamId={currentMatch.awayTeamId} name={currentMatch.awayTeamName ?? t(language, "admin.matches.awayTeam")} logo={currentMatch.awayTeamLogo} color={currentMatch.awayTeamColor} />} aria-controls="attendance-roster-panel" />
+              </Tabs>
+              <div role="tabpanel" id="attendance-roster-panel" aria-labelledby={`attendance-roster-tab-${rosterTeam}`}>
+                {teamRoster.length === 0 ? <EmptyState icon={User} title={t(language, "attendance.noTeamPlayers")} /> : (
+                  <TableWrap>
+                    <AdminTable>
+                      <thead><tr><th>{t(language, "attendance.player")}</th><th>{t(language, "attendance.status")}</th>{covers(user?.role, "ADMIN") && <th />}</tr></thead>
+                      <tbody>{teamRoster.map(({ player, attendance, isPresent }) => (
+                        <tr key={player.id}>
+                          <td><Link to={`/players/${player.id}`} state={linkState}>{player.name}</Link></td>
+                          <td><Chip label={t(language, isPresent ? "attendance.present" : "attendance.absent")} color={isPresent ? "success" : "default"} size="small" /></td>
+                          {covers(user?.role, "ADMIN") && <td>{isPresent && attendance && canConfirm && <Button disabled={busy} onClick={() => { setCorrection(attendance); setReason(""); }}>{t(language, "attendance.correct")}</Button>}</td>}
+                        </tr>
+                      ))}</tbody>
+                    </AdminTable>
+                  </TableWrap>
+                )}
+              </div>
             </Card>
           )}
         </>

@@ -1,11 +1,14 @@
 import { Button, MenuItem } from "@mui/material";
 import { Pencil, Plus, QrCode, Trash2, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
 import EmptyState from "../../../components/reusable/EmptyState";
 import StyledSelect from "../../../components/reusable/StyledSelect";
 import StyledTextField from "../../../components/reusable/StyledTextField";
+import TeamIdentity from "../../../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../../../hooks/usePageNavigation";
 import { t } from "../../../i18n";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { showSnackbar } from "../../../store/slices/snackbarSlice";
@@ -28,6 +31,7 @@ import PlayerModal from "../modals/PlayerModal";
 import PlayerQrModal from "../modals/PlayerQrModal";
 
 const PlayersAdmin = () => {
+  const { linkState } = usePageNavigation();
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const { players } = useAppSelector((state) => state.players);
@@ -107,7 +111,7 @@ const PlayersAdmin = () => {
             <MenuItem value="">{t(language, "admin.players.allTeams")}</MenuItem>
             {teams.map((team) => (
               <MenuItem key={team.id} value={team.id}>
-                {team.name}
+                <TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />
               </MenuItem>
             ))}
           </StyledSelect>
@@ -150,9 +154,9 @@ const PlayersAdmin = () => {
                     {player.shirtNumber ?? "—"}
                   </td>
                   <td>
-                    <strong>{player.name}</strong>
+                    <Link to={`/players/${player.id}`} state={linkState}><strong>{player.name}</strong></Link>
                   </td>
-                  <td>{player.teamName ?? "—"}</td>
+                  <td><TeamIdentity teamId={player.teamId} name={player.teamName} linked /></td>
                   <td>
                     {player.position
                       ? t(language, ("position." + player.position) as never)

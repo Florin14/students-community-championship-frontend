@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
 import EmptyState from "../../../components/reusable/EmptyState";
-import TeamBadge from "../../../components/reusable/TeamBadge";
+import TeamIdentity from "../../../components/reusable/TeamIdentity";
 import { t } from "../../../i18n";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { showSnackbar } from "../../../store/slices/snackbarSlice";
@@ -97,22 +97,7 @@ const TeamsAdmin = () => {
               {teams.map((team) => (
                 <tr key={team.id}>
                   <td>
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 10,
-                      }}
-                    >
-                      <TeamBadge
-                        name={team.name}
-                        shortName={team.shortName}
-                        logo={team.logo}
-                        color={team.color}
-                        size={34}
-                      />
-                      <strong>{team.name}</strong>
-                    </div>
+                    <TeamIdentity teamId={team.id} name={team.name} shortName={team.shortName} logo={team.logo} color={team.color} size={34} linked />
                   </td>
                   <td>{team.shortName ?? "—"}</td>
                   <td>{team.faculty ?? "—"}</td>

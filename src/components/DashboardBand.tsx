@@ -52,8 +52,7 @@ const TabRow = styled(Inner)`
   }
 `;
 
-// The tab row keeps its divider full-width while the tabs scroll under it;
-// on a phone the season selector drops to its own line.
+// The season selector drops below the navigation on a phone.
 const TabScroll = styled.div`
   min-width: 0;
   flex: 1;
@@ -160,6 +159,7 @@ const DashboardBand = ({ showStats }: DashboardBandProps) => {
               playerId={topScorers[0]?.playerId}
               name={overview.topScorerName}
               teamName={overview.topScorerTeamName}
+              teamId={topScorers[0]?.teamId}
               avatar={topScorers[0]?.avatar}
               goals={overview.topScorerGoals}
               eyebrow={t(language, "home.topScorerLabel")}
@@ -171,7 +171,7 @@ const DashboardBand = ({ showStats }: DashboardBandProps) => {
 
       <TabRow>
         <TabScroll>
-          <NavTabs tabs={tabs} />
+          <NavTabs tabs={tabs} ariaLabel={t(language, "nav.publicNavigation")} />
         </TabScroll>
         <SeasonSelector minWidth={170} />
       </TabRow>

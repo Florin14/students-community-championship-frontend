@@ -1,5 +1,5 @@
 import { CalendarDays, Flag, Trophy, User, UserCog, Users } from "lucide-react";
-import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import styled from "styled-components";
 
 import SectionHeading from "../../components/reusable/SectionHeading";
@@ -66,7 +66,8 @@ const TABS: { key: AdminTab; label: TranslationKey; icon: typeof Users }[] = [
 
 const Admin = () => {
   const language = useAppSelector((state) => state.i18n.language);
-  const [tab, setTab] = useState<AdminTab>("matches");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tab = TABS.find((item) => item.key === searchParams.get("tab"))?.key ?? "matches";
 
   return (
     <>
@@ -79,7 +80,7 @@ const Admin = () => {
           <TabButton
             key={key}
             $active={tab === key}
-            onClick={() => setTab(key)}
+            onClick={() => setSearchParams((params) => { params.set("tab", key); return params; })}
           >
             <Icon size={16} />
             {t(language, label)}

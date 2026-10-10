@@ -1,10 +1,13 @@
 import { Alert, Button, Dialog, DialogActions, DialogContent, DialogTitle, Stack } from "@mui/material";
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
 import LoadingState from "../../../components/reusable/LoadingState";
 import SeasonSelector from "../../../components/reusable/SeasonSelector";
 import { t } from "../../../i18n";
+import TeamIdentity from "../../../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../../../hooks/usePageNavigation";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { clearPlayerQr } from "../../../store/slices/attendanceSlice";
 import { issuePlayerQr, revokePlayerQr } from "../../../store/slices/thunks/attendanceThunks";
@@ -14,6 +17,7 @@ import { createPlayerQrUrl } from "../../../utils/playerQr";
 interface Props { player: Player | null; onClose: () => void }
 
 const PlayerQrModal = ({ player, onClose }: Props) => {
+  const { linkState } = usePageNavigation();
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const { selectedSeasonId, activeSeason } = useAppSelector((state) => state.seasons);
@@ -71,8 +75,8 @@ const PlayerQrModal = ({ player, onClose }: Props) => {
           {qr && image && (
             <>
               <img src={image} alt={t(language, "attendance.qrTitle")} width={320} height={320} style={{ maxWidth: "100%", height: "auto" }} />
-              <strong>{qr.playerName} · {qr.teamName} · {qr.seasonName}</strong>
-              <Button component="a" href={createPlayerQrUrl(qr)}>{t(language, "attendance.openProfile")}</Button>
+              <strong>{qr.playerName} · <TeamIdentity teamId={qr.teamId} name={qr.teamName} /> · {qr.seasonName}</strong>
+              <Button component={Link} to={{ pathname: `/players/${qr.playerId}`, hash: new URL(createPlayerQrUrl(qr)).hash }} state={linkState}>{t(language, "attendance.openProfile")}</Button>
               <Button component="a" href={image} download={`scc-player-${qr.playerId}-season-${qr.seasonId}.svg`} variant="contained">{t(language, "attendance.download")}</Button>
             </>
           )}

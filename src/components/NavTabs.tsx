@@ -8,6 +8,11 @@ const Bar = styled.nav`
   overflow-x: auto;
   scrollbar-width: none;
 
+  @media (max-width: 720px) {
+    flex-wrap: wrap;
+    overflow-x: visible;
+  }
+
   &::-webkit-scrollbar {
     display: none;
   }
@@ -39,6 +44,12 @@ const Tab = styled(NavLink)`
     color: var(--accent);
     border-bottom-color: var(--accent);
   }
+
+  @media (max-width: 720px) {
+    padding: 10px 12px;
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+  }
 `;
 
 const LiveDot = styled.span`
@@ -61,14 +72,14 @@ export interface NavTab {
 
 interface NavTabsProps {
   tabs: NavTab[];
+  ariaLabel?: string;
 }
 
 /**
- * The one and only navigation of the public area: a row of route tabs that
- * sits under the season hero, in the same place on every page.
+ * Shared section navigation for the public and staff areas.
  */
-const NavTabs = ({ tabs }: NavTabsProps) => (
-  <Bar aria-label="sections">
+const NavTabs = ({ tabs, ariaLabel = "sections" }: NavTabsProps) => (
+  <Bar aria-label={ariaLabel}>
     {tabs.map(({ to, label, icon: Icon, end, live }) => (
       <Tab key={to} to={to} end={end}>
         {Icon && <Icon size={14} />}

@@ -2,6 +2,7 @@ import { ArrowRight, Radio } from "lucide-react";
 import { Link } from "react-router-dom";
 import styled from "styled-components";
 
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 import { usePolling } from "../../hooks/usePolling";
 import { t } from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
@@ -114,6 +115,7 @@ const Minute = styled.small`
  * one request per interval.
  */
 const LiveStrip = () => {
+  const { linkState } = usePageNavigation();
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const matches = useAppSelector((state) => state.live.matches);
@@ -139,7 +141,7 @@ const LiveStrip = () => {
 
       <Rail>
         {matches.map((match) => (
-          <Tile key={match.id} to={`/matches/${match.id}`}>
+          <Tile key={match.id} to={`/matches/${match.id}`} state={linkState}>
             <Row>
               <Team>
                 <TeamBadge

@@ -15,6 +15,7 @@ import api from "../../../api/config";
 import ConfirmDialog from "../../../components/reusable/ConfirmDialog";
 import EmptyState from "../../../components/reusable/EmptyState";
 import { t } from "../../../i18n";
+import TeamIdentity from "../../../components/reusable/TeamIdentity";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
 import { showSnackbar } from "../../../store/slices/snackbarSlice";
 import {
@@ -285,7 +286,7 @@ const SeasonsAdmin = () => {
                       }
                     />
                   }
-                  label={team.name}
+                  label={<TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />}
                   sx={{ color: "var(--text-primary)" }}
                 />
               ))}

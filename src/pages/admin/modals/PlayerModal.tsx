@@ -13,6 +13,7 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import styled from "styled-components";
 
 import StyledSelect from "../../../components/reusable/StyledSelect";
+import TeamIdentity from "../../../components/reusable/TeamIdentity";
 import StyledTextField from "../../../components/reusable/StyledTextField";
 import { t } from "../../../i18n";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks";
@@ -241,7 +242,7 @@ const PlayerModal = ({ open, player, onClose }: PlayerModalProps) => {
                 </MenuItem>
                 {teams.map((team) => (
                   <MenuItem key={team.id} value={team.id}>
-                    {team.name}
+                    <TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />
                   </MenuItem>
                 ))}
               </StyledSelect>

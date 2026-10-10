@@ -4,6 +4,8 @@ import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import { imageSrc } from "../../utils/images";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
+import TeamIdentity from "./TeamIdentity";
 
 const Card = styled(motion(Link))`
   position: relative;
@@ -115,6 +117,7 @@ interface TopScorerHeroProps {
   playerId?: number | null;
   name: string;
   teamName?: string | null;
+  teamId?: number | null;
   avatar?: string | null;
   goals: number;
   eyebrow: string;
@@ -125,15 +128,18 @@ const TopScorerHero = ({
   playerId,
   name,
   teamName,
+  teamId,
   avatar,
   goals,
   eyebrow,
   unit,
 }: TopScorerHeroProps) => {
   const src = imageSrc(avatar);
+  const { linkState } = usePageNavigation();
   return (
     <Card
       to={playerId ? `/players/${playerId}` : "/players"}
+      state={linkState}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, ease: "easeOut" }}
@@ -145,7 +151,7 @@ const TopScorerHero = ({
           {eyebrow}
         </Eyebrow>
         <Name>{name}</Name>
-        {teamName && <Team>{teamName}</Team>}
+        {teamName && <Team><TeamIdentity teamId={teamId} name={teamName} size={22} /></Team>}
       </Text>
       <Figure>
         <strong>{goals}</strong>

@@ -31,6 +31,7 @@ import {
   fetchSeasons,
 } from "./store/slices/thunks/seasonsThunks";
 import { createAppTheme } from "./theme";
+import { fetchTeamDirectory } from "./store/slices/thunks/teamsThunks";
 
 const router = createBrowserRouter([
   {
@@ -85,6 +86,7 @@ const App = () => {
   useEffect(() => {
     dispatch(fetchSeasons());
     dispatch(fetchActiveSeason());
+    dispatch(fetchTeamDirectory());
   }, [dispatch]);
 
   return (

@@ -18,6 +18,8 @@ import AudienceField from "../../components/reusable/AudienceField";
 import { isValidAudience } from "../../utils/audience";
 import LoadingState from "../../components/reusable/LoadingState";
 import StyledTextField from "../../components/reusable/StyledTextField";
+import TeamBadge from "../../components/reusable/TeamBadge";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 import { usePolling, useOnlineStatus } from "../../hooks/usePolling";
 import { t } from "../../i18n";
 import {
@@ -117,6 +119,7 @@ const ScoringConsole = () => {
   const [, setClockTick] = useState(0);
 
   const isSuperAdmin = covers(user?.role, "SUPER_ADMIN");
+  const { linkState } = usePageNavigation();
 
   useEffect(() => {
     setAudience(match?.audience == null ? "" : String(match.audience));
@@ -329,7 +332,7 @@ const ScoringConsole = () => {
   if (!match) {
     return (
       <ConsoleShell>
-        <BackLink to="/live">
+        <BackLink to="/admin/live">
           <ArrowLeft size={16} />
           {t(language, "console.back")}
         </BackLink>
@@ -345,10 +348,15 @@ const ScoringConsole = () => {
 
   return (
     <ConsoleShell>
-      <BackLink to="/live">
+      <BackLink to="/admin/live">
         <ArrowLeft size={16} />
         {t(language, "console.back")}
       </BackLink>
+
+      <div style={{ display: "flex", gap: 20, flexWrap: "wrap" }}>
+        <BackLink to={`/matches/${matchId}`} state={linkState}>{t(language, "console.viewMatch")}</BackLink>
+        <BackLink to={`/admin/attendance?matchId=${matchId}`} state={linkState}>{t(language, "attendance.title")}</BackLink>
+      </div>
 
       <SyncStatus
         online={online}
@@ -369,12 +377,14 @@ const ScoringConsole = () => {
       <ConsoleCard>
         <Scoreboard>
           <ScoreTeam $align="left">
+            <TeamBadge name={match.homeTeamName} shortName={match.homeTeamShortName} logo={match.homeTeamLogo} color={match.homeTeamColor} size={36} decorative />
             <strong>{match.homeTeamName}</strong>
           </ScoreTeam>
           <ScoreValue>
             {notStarted ? "—" : match.scoreHome ?? 0} : {notStarted ? "—" : match.scoreAway ?? 0}
           </ScoreValue>
           <ScoreTeam $align="right">
+            <TeamBadge name={match.awayTeamName} shortName={match.awayTeamShortName} logo={match.awayTeamLogo} color={match.awayTeamColor} size={36} decorative />
             <strong>{match.awayTeamName}</strong>
           </ScoreTeam>
         </Scoreboard>
