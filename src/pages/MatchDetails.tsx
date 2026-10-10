@@ -24,6 +24,7 @@ import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { clearSelectedMatch } from "../store/slices/matchesSlice";
 import { fetchMatchById } from "../store/slices/thunks/matchesThunks";
 import { usePolling } from "../hooks/usePolling";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { formatDateTimeDot, parseApiDate } from "../utils/dateFormat";
 
 const BackLink = styled(Link)`
@@ -200,6 +201,7 @@ const MatchDetails = () => {
   const { id } = useParams();
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
+  const { linkState, backLinkProps, backLabel } = usePageNavigation("/matches", "matchDetails.back");
   const { selectedMatch: match, loading } = useAppSelector(
     (state) => state.matches
   );
@@ -232,11 +234,14 @@ const MatchDetails = () => {
 
   if (!match) {
     return (
-      <EmptyState
-        icon={SearchX}
-        title={t(language, "matchDetails.notFound")}
-        subtitle={t(language, "matchDetails.notFoundHint")}
-      />
+      <>
+        <BackLink {...backLinkProps}><ArrowLeft size={15} />{backLabel}</BackLink>
+        <EmptyState
+          icon={SearchX}
+          title={t(language, "matchDetails.notFound")}
+          subtitle={t(language, "matchDetails.notFoundHint")}
+        />
+      </>
     );
   }
 
@@ -252,9 +257,9 @@ const MatchDetails = () => {
 
   return (
     <>
-      <BackLink to="/matches">
+      <BackLink {...backLinkProps}>
         <ArrowLeft size={15} />
-        {t(language, "matchDetails.back")}
+        {backLabel}
       </BackLink>
 
       <Hero
@@ -274,7 +279,7 @@ const MatchDetails = () => {
         </HeroTop>
 
         <Board>
-          <TeamSide $align="left" to={`/teams/${match.homeTeamId}`}>
+          <TeamSide $align="left" to={`/teams/${match.homeTeamId}`} state={linkState}>
             <TeamBadge
               name={match.homeTeamName}
               shortName={match.homeTeamShortName}
@@ -291,7 +296,7 @@ const MatchDetails = () => {
           ) : (
             <BigVs>VS</BigVs>
           )}
-          <TeamSide $align="right" to={`/teams/${match.awayTeamId}`}>
+          <TeamSide $align="right" to={`/teams/${match.awayTeamId}`} state={linkState}>
             <TeamBadge
               name={match.awayTeamName}
               shortName={match.awayTeamShortName}

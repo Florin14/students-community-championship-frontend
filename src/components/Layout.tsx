@@ -1,8 +1,8 @@
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import { motion } from "framer-motion";
-import { LogOut, Moon, Radio, Shield, Sun } from "lucide-react";
+import { BarChart3, ClipboardCheck, LogOut, Moon, Radio, Shield, Sun, Trophy } from "lucide-react";
 import { MouseEvent, useMemo, useState } from "react";
-import { NavLink, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { NavLink, Outlet, ScrollRestoration, useLocation, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 import { t } from "../i18n";
@@ -16,6 +16,7 @@ import DashboardBand from "./DashboardBand";
 import Footer from "./Footer";
 import GlobalSnackbar from "./GlobalSnackbar";
 import LiveMatchReminder from "./LiveMatchReminder";
+import NavTabs, { type NavTab } from "./NavTabs";
 
 const Header = styled(motion.header)`
   position: sticky;
@@ -176,6 +177,14 @@ const Main = styled.main`
 
 const Page = styled(motion.div)``;
 
+const StaffNav = styled.div`
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  border-bottom: 1px solid var(--divider);
+  @media (max-width: 640px) { padding: 0 16px; }
+`;
+
 // The tab bar belongs to the public area; the secured area has its own frame.
 const isPublicPath = (pathname: string) =>
   !pathname.startsWith("/admin") && pathname !== "/not-found";
@@ -217,8 +226,15 @@ const Layout = () => {
 
   const [adminAnchor, setAdminAnchor] = useState<null | HTMLElement>(null);
 
-  // An operator has no admin panel, so the shield goes straight to the console.
   const canAdminister = covers(user?.role, "ADMIN");
+  const canOperate = isAuthenticated && covers(user?.role, "OPERATOR");
+  const staffTabs: NavTab[] = [
+    { to: "/admin/live", label: t(language, "nav.console"), icon: Radio },
+    { to: "/admin/attendance", label: t(language, "attendance.title"), icon: ClipboardCheck, end: true },
+    { to: "/admin/attendance/stats", label: t(language, "attendance.stats"), icon: BarChart3 },
+    ...(canAdminister ? [{ to: "/admin", label: t(language, "nav.adminPanel"), icon: Shield, end: true }] : []),
+    { to: "/", label: t(language, "nav.championship"), icon: Trophy, end: true },
+  ];
 
   const handleAdminClick = (event: MouseEvent<HTMLElement>) => {
     if (isAuthenticated) {
@@ -318,14 +334,14 @@ const Layout = () => {
           <Radio size={15} style={{ marginRight: 8 }} />
           {t(language, "nav.console")}
         </MenuItem>}
-        <MenuItem
+        {canOperate && <MenuItem
           onClick={() => {
             setAdminAnchor(null);
             navigate("/admin/attendance");
           }}
         >
           {t(language, "attendance.title")}
-        </MenuItem>
+        </MenuItem>}
         {canAdminister && (
           <MenuItem
             onClick={() => {
@@ -344,6 +360,9 @@ const Layout = () => {
       </Menu>
 
       {publicArea && <DashboardBand showStats={sectionRoot} />}
+      {!publicArea && canOperate && location.pathname !== "/admin/login" && (
+        <StaffNav><NavTabs tabs={staffTabs} ariaLabel={t(language, "nav.staffNavigation")} /></StaffNav>
+      )}
 
       <Main>
         {isAuthenticated && user && covers(user.role, "OPERATOR") && (
@@ -360,6 +379,7 @@ const Layout = () => {
       </Main>
       <Footer />
       <GlobalSnackbar />
+      <ScrollRestoration />
     </>
   );
 };

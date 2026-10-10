@@ -8,6 +8,8 @@ import EmptyState from "../../components/reusable/EmptyState";
 import LoadingState from "../../components/reusable/LoadingState";
 import SectionHeading from "../../components/reusable/SectionHeading";
 import StatCard from "../../components/reusable/StatCard";
+import TeamIdentity from "../../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 import { t } from "../../i18n";
 import { useAppDispatch, useAppSelector } from "../../store/hooks";
 import { fetchAudienceStats } from "../../store/slices/thunks/statsThunks";
@@ -47,6 +49,7 @@ const MatchRow = styled(Link)`
 
 const AudienceStats = ({ seasonId }: { seasonId?: number }) => {
   const dispatch = useAppDispatch();
+  const { linkState } = usePageNavigation();
   const language = useAppSelector((state) => state.i18n.language);
   const { audience, audienceLoading, audienceError } = useAppSelector((state) => state.stats);
   const requestStats = () => dispatch(fetchAudienceStats({ seasonId, limit: 10 }));
@@ -77,10 +80,10 @@ const AudienceStats = ({ seasonId }: { seasonId?: number }) => {
           <SectionHeading title={t(language, "stats.audienceRanking")} />
           <Ranking>
             {audience.data.map((match, index) => (
-              <MatchRow key={match.matchId} to={`/matches/${match.matchId}`}>
+              <MatchRow key={match.matchId} to={`/matches/${match.matchId}`} state={linkState}>
                 <span>{index + 1}</span>
                 <div>
-                  <strong>{match.homeTeamName} – {match.awayTeamName}</strong>
+                  <strong><TeamIdentity name={match.homeTeamName} size={22} /> – <TeamIdentity name={match.awayTeamName} size={22} /></strong>
                   <small>{formatDateTimeDot(parseApiDate(match.timestamp))}</small>
                 </div>
                 <strong>{t(language, "matches.audienceCount", { count: match.audience })}</strong>

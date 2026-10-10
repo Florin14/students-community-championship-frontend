@@ -1,7 +1,20 @@
 import { attendanceRo } from "./attendance";
 
 const ro = {
+  "nav.backToPage": "Înapoi la {page}",
+  "nav.backToChampionship": "Înapoi la campionat",
+  "nav.championship": "Campionat",
+  "nav.matchDetails": "detaliile meciului",
+  "nav.playerDetails": "profilul jucătorului",
+  "nav.teamDetails": "detaliile echipei",
+  "console.viewMatch": "Detalii meci",
+  "nav.staffNavigation": "Pagini pentru organizatori",
+  "nav.publicNavigation": "Paginile campionatului",
+  "console.reminderTime": "Cronometrul este pornit și sunt {minutes} minute de joc. Verifică dacă trebuie pus pe pauză sau confirmat rezultatul.",
   ...attendanceRo,
+  "playerPhoto.open": "Mărește fotografia lui {name}",
+  "playerPhoto.title": "Fotografia jucătorului: {name}",
+  "playerPhoto.close": "Închide",
   "calendar.title": "Calendar competițional",
   "calendar.publicHint": "Calendar orientativ al sezonului. Datele pot fi actualizate; programul fiecărui meci este afișat mai jos.",
   "calendar.loadTemplate": "Încarcă șablonul 2026–2027",

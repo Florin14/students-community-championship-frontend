@@ -6,9 +6,12 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
+import ExpandablePlayerPhoto from "../components/reusable/ExpandablePlayerPhoto";
 import SeasonSelector from "../components/reusable/SeasonSelector";
 import SectionHeading from "../components/reusable/SectionHeading";
 import StatCard from "../components/reusable/StatCard";
+import TeamIdentity from "../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
@@ -218,9 +221,10 @@ const EventLabel = styled.span`
 const EventMatch = styled.span`
   font-size: 0.78rem;
   color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 5px;
 `;
 
 const EventMeta = styled.div`
@@ -271,6 +275,7 @@ const PlayerDetails = () => {
   );
 
   const seasonId = selectedSeasonId ?? activeSeason?.id;
+  const { linkState, backLinkProps, backLabel } = usePageNavigation("/players", "playerDetails.back");
 
   useEffect(() => {
     if (!Number.isFinite(playerId)) return;
@@ -285,9 +290,9 @@ const PlayerDetails = () => {
   if (!selectedPlayer || selectedPlayer.id !== playerId) {
     return (
       <>
-        <BackLink to="/players">
+        <BackLink {...backLinkProps}>
           <ArrowLeft size={15} />
-          {t(language, "playerDetails.back")}
+          {backLabel}
         </BackLink>
         <EmptyState
           icon={User}
@@ -299,9 +304,9 @@ const PlayerDetails = () => {
 
   return (
     <>
-      <BackLink to="/players">
+      <BackLink {...backLinkProps}>
         <ArrowLeft size={15} />
-        {t(language, "playerDetails.back")}
+        {backLabel}
       </BackLink>
 
       <HeaderCard
@@ -311,9 +316,9 @@ const PlayerDetails = () => {
       >
         <Avatar>
           {imageSrc(selectedPlayer.avatar) ? (
-            <img
+            <ExpandablePlayerPhoto
               src={imageSrc(selectedPlayer.avatar)}
-              alt={selectedPlayer.name}
+              name={selectedPlayer.name}
             />
           ) : (
             initialsOf(selectedPlayer.name)
@@ -331,8 +336,8 @@ const PlayerDetails = () => {
               </PositionChip>
             )}
             {selectedPlayer.teamId && selectedPlayer.teamName && (
-              <TeamChip to={`/teams/${selectedPlayer.teamId}`}>
-                {selectedPlayer.teamName}
+              <TeamChip to={`/teams/${selectedPlayer.teamId}`} state={linkState}>
+                <TeamIdentity teamId={selectedPlayer.teamId} name={selectedPlayer.teamName} />
               </TeamChip>
             )}
           </TagsRow>
@@ -347,7 +352,7 @@ const PlayerDetails = () => {
       {qrLink && (
         <Alert severity="info" sx={{ mb: 3 }}>
           <p>{t(language, "attendance.qrProfileHint")}</p>
-          <Button component={Link} to={`/admin/attendance${location.hash}`} variant="contained" sx={{ mt: 1 }}>
+          <Button component={Link} to={`/admin/attendance${location.hash}`} state={linkState} variant="contained" sx={{ mt: 1 }}>
             {t(language, "attendance.checkMatch")}
           </Button>
         </Alert>
@@ -399,6 +404,7 @@ const PlayerDetails = () => {
             <EventRow
               key={`${event.matchId}-${event.type}-${index}`}
               to={`/matches/${event.matchId}`}
+              state={linkState}
             >
               <EventIcon $type={event.type}>
                 {event.type === "GOAL" && <Goal size={17} />}
@@ -414,7 +420,7 @@ const PlayerDetails = () => {
                   )}
                 </EventLabel>
                 <EventMatch>
-                  {event.homeTeamName} vs {event.awayTeamName}
+                  <TeamIdentity name={event.homeTeamName} size={20} /> vs <TeamIdentity name={event.awayTeamName} size={20} />
                   {event.scoreHome !== null &&
                   event.scoreHome !== undefined &&
                   event.scoreAway !== null &&

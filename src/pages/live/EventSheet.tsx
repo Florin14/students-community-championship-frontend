@@ -2,6 +2,7 @@ import { ArrowLeft, Check, Pencil, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import { createPortal } from "react-dom";
 import styled from "styled-components";
+import TeamIdentity from "../../components/reusable/TeamIdentity";
 
 import { t, type Language, type TranslationKey } from "../../i18n";
 import type { MatchDetails, MatchEventType, Player } from "../../types";
@@ -255,7 +256,7 @@ const EventSheet = ({
     squad: Player[]
   ) => (
     <SquadColumn>
-      <SquadLabel $color={color}>{teamName}</SquadLabel>
+      <SquadLabel $color={color}><TeamIdentity teamId={teamId} name={teamName} logo={teamId === match.homeTeamId ? match.homeTeamLogo : match.awayTeamLogo} color={color} /></SquadLabel>
       {squad.length === 0 && (
         <span
           style={{
@@ -377,7 +378,7 @@ const EventSheet = ({
             <>
               <ScorerSummary>
                 <SquadLabel $color={scorer.teamId === match.homeTeamId ? match.homeTeamColor : match.awayTeamColor}>
-                  {scorer.teamId === match.homeTeamId ? match.homeTeamName : match.awayTeamName}
+                  <TeamIdentity teamId={scorer.teamId} name={scorer.teamId === match.homeTeamId ? match.homeTeamName : match.awayTeamName} logo={scorer.teamId === match.homeTeamId ? match.homeTeamLogo : match.awayTeamLogo} color={scorer.teamId === match.homeTeamId ? match.homeTeamColor : match.awayTeamColor} />
                 </SquadLabel>
                 <strong>{t(language, "console.selectedScorer", { player: scorerName })}</strong>
               </ScorerSummary>

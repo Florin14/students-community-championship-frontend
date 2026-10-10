@@ -4,6 +4,16 @@ import api from "../../../api/config";
 import type { Team, TeamPayload } from "../../../types";
 import { getErrorMessage } from "./thunkUtils";
 
+export const fetchTeamDirectory = createAsyncThunk<Team[], void, { rejectValue: string }>(
+  "teams/fetchDirectory", async (_, thunkAPI) => {
+    try {
+      return (await api.get<{ data: Team[] }>("/teams/")).data.data;
+    } catch (error: unknown) {
+      return thunkAPI.rejectWithValue(getErrorMessage(error, "Failed to fetch teams"));
+    }
+  }
+);
+
 export const fetchTeams = createAsyncThunk<
   Team[],
   { seasonId?: number; search?: string } | void,

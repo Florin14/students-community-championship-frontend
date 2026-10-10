@@ -1,13 +1,14 @@
 import { motion } from "framer-motion";
 import { GraduationCap, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
 import StyledTextField from "../components/reusable/StyledTextField";
 import TeamBadge from "../components/reusable/TeamBadge";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchTeams } from "../store/slices/thunks/teamsThunks";
@@ -27,7 +28,7 @@ const Grid = styled.div`
   gap: 16px;
 `;
 
-const Card = styled(motion.div)`
+const Card = styled(motion(Link))`
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -85,7 +86,7 @@ const PlayerCount = styled.div`
 
 const Teams = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
+  const { linkState } = usePageNavigation();
   const language = useAppSelector((state) => state.i18n.language);
   const { teams, loading } = useAppSelector((state) => state.teams);
   const { selectedSeasonId, activeSeason } = useAppSelector(
@@ -134,7 +135,8 @@ const Teams = () => {
           {filtered.map((team, index) => (
             <Card
               key={team.id}
-              onClick={() => navigate(`/teams/${team.id}`)}
+              to={`/teams/${team.id}`}
+              state={linkState}
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.3) }}

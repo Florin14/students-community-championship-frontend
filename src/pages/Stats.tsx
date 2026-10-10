@@ -17,6 +17,8 @@ import styled from "styled-components";
 import EmptyState from "../components/reusable/EmptyState";
 import SectionHeading from "../components/reusable/SectionHeading";
 import StatCard from "../components/reusable/StatCard";
+import TeamIdentity from "../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import {
@@ -165,6 +167,7 @@ const truncate = (value: string, max = 12) =>
   value.length > max ? `${value.slice(0, max)}…` : value;
 
 const Stats = () => {
+  const { linkState } = usePageNavigation();
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const { overview, topScorers, topAssists, discipline, goalsPerRound } =
@@ -202,11 +205,11 @@ const Stats = () => {
       <EmptyState icon={BarChart3} title={t(language, "stats.empty")} />
     ) : (
       items.map((player, index) => (
-        <Row key={player.playerId} to={`/players/${player.playerId}`}>
+        <Row key={player.playerId} to={`/players/${player.playerId}`} state={linkState}>
           <Rank $top={index === 0}>{index + 1}</Rank>
           <Name>
             {player.name}
-            {player.teamName && <TeamTag>{player.teamName}</TeamTag>}
+            {player.teamName && <TeamTag><TeamIdentity teamId={player.teamId} name={player.teamName} size={22} /></TeamTag>}
           </Name>
           {render(player)}
         </Row>

@@ -23,7 +23,7 @@ const RequireRole = ({ minRole = "OPERATOR" }: RequireRoleProps) => {
   }
 
   if (!covers(user.role, minRole)) {
-    return <Navigate to="/admin/live" replace />;
+    return <Navigate to={covers(user.role, "OPERATOR") ? "/admin/live" : "/"} replace />;
   }
 
   return <Outlet />;

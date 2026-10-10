@@ -8,6 +8,8 @@ import EmptyState from "../components/reusable/EmptyState";
 import LoadingState from "../components/reusable/LoadingState";
 import StyledSelect from "../components/reusable/StyledSelect";
 import StyledTextField from "../components/reusable/StyledTextField";
+import TeamIdentity from "../components/reusable/TeamIdentity";
+import { usePageNavigation } from "../hooks/usePageNavigation";
 import { t } from "../i18n";
 import { useAppDispatch, useAppSelector } from "../store/hooks";
 import { fetchPlayers } from "../store/slices/thunks/playersThunks";
@@ -166,6 +168,7 @@ const initialsOf = (name: string) =>
     .toUpperCase();
 
 const Players = () => {
+  const { linkState } = usePageNavigation();
   const dispatch = useAppDispatch();
   const language = useAppSelector((state) => state.i18n.language);
   const { players, loading } = useAppSelector((state) => state.players);
@@ -243,7 +246,7 @@ const Players = () => {
           <MenuItem value="">{t(language, "players.allTeams")}</MenuItem>
           {teams.map((team) => (
             <MenuItem key={team.id} value={String(team.id)}>
-              {team.name}
+              <TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />
             </MenuItem>
           ))}
         </StyledSelect>
@@ -291,7 +294,7 @@ const Players = () => {
                       </Muted>
                     </td>
                     <td>
-                      <PlayerCell to={`/players/${player.id}`}>
+                      <PlayerCell to={`/players/${player.id}`} state={linkState}>
                         <Avatar>
                           {imageSrc(player.avatar) ? (
                             <img
@@ -306,9 +309,7 @@ const Players = () => {
                       </PlayerCell>
                     </td>
                     <td>
-                      {player.teamShortName || player.teamName || (
-                        <Muted>—</Muted>
-                      )}
+                      <TeamIdentity teamId={player.teamId} name={player.teamShortName || player.teamName} linked />
                     </td>
                     <td>
                       {player.position ? (

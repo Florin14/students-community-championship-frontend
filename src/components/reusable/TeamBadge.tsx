@@ -1,8 +1,9 @@
+import { useState } from "react";
 import styled from "styled-components";
 
 import { imageSrc } from "../../utils/images";
 
-const Badge = styled.div<{ $size: number; $ring?: string | null }>`
+const Badge = styled.span<{ $size: number; $ring?: string | null }>`
   width: ${({ $size }) => $size}px;
   height: ${({ $size }) => $size}px;
   min-width: ${({ $size }) => $size}px;
@@ -23,7 +24,7 @@ const Badge = styled.div<{ $size: number; $ring?: string | null }>`
   img {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
   }
 `;
 
@@ -33,6 +34,7 @@ interface TeamBadgeProps {
   logo?: string | null;
   color?: string | null;
   size?: number;
+  decorative?: boolean;
 }
 
 const initialsOf = (name?: string | null, shortName?: string | null) => {
@@ -53,11 +55,13 @@ const TeamBadge = ({
   logo,
   color,
   size = 44,
+  decorative = false,
 }: TeamBadgeProps) => {
   const src = imageSrc(logo);
+  const [failedSrc, setFailedSrc] = useState("");
   return (
-    <Badge $size={size} $ring={color} title={name ?? undefined}>
-      {src ? <img src={src} alt={name ?? ""} /> : initialsOf(name, shortName)}
+    <Badge $size={size} $ring={color} title={name ?? undefined} aria-hidden={decorative || undefined}>
+      {src && src !== failedSrc ? <img src={src} alt={decorative ? "" : name ?? ""} onError={() => setFailedSrc(src)} /> : initialsOf(name, shortName)}
     </Badge>
   );
 };

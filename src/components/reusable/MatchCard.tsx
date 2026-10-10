@@ -1,5 +1,5 @@
 import { MapPin, ShieldCheck, Users } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import styled from "styled-components";
 
 import { Language, t } from "../../i18n";
@@ -7,8 +7,9 @@ import type { Match } from "../../types";
 import { formatDateTimeDot, parseApiDate } from "../../utils/dateFormat";
 import MatchStateChip from "./MatchStateChip";
 import TeamBadge from "./TeamBadge";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 
-const Card = styled.div`
+const Card = styled(Link)`
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 18px;
@@ -103,7 +104,7 @@ interface MatchCardProps {
 }
 
 const MatchCard = ({ match, language }: MatchCardProps) => {
-  const navigate = useNavigate();
+  const { linkState } = usePageNavigation();
   const hasScore =
     match.scoreHome !== null &&
     match.scoreHome !== undefined &&
@@ -111,13 +112,7 @@ const MatchCard = ({ match, language }: MatchCardProps) => {
     match.scoreAway !== undefined;
 
   return (
-    <Card role="link" tabIndex={0} onClick={() => navigate(`/matches/${match.id}`)}
-      onKeyDown={(event) => {
-        if (event.key === "Enter" || event.key === " ") {
-          event.preventDefault();
-          navigate(`/matches/${match.id}`);
-        }
-      }}>
+    <Card to={`/matches/${match.id}`} state={linkState}>
       <TopRow>
         <span>
           {match.calendarLabel && `${match.calendarLabel} · `}

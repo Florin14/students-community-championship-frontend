@@ -5,6 +5,7 @@ import { Language, t } from "../../i18n";
 import { Standing } from "../../types";
 import FormPills from "./FormPills";
 import TeamBadge from "./TeamBadge";
+import { usePageNavigation } from "../../hooks/usePageNavigation";
 
 const Wrapper = styled.div`
   overflow-x: auto;
@@ -58,6 +59,7 @@ const Row = styled.tr`
   &:hover {
     background: var(--bg-surface);
   }
+  &:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 `;
 
 const Td = styled.td<{ $align?: string; $muted?: boolean }>`
@@ -175,6 +177,7 @@ const StandingsTable = ({
   limit,
 }: StandingsTableProps) => {
   const navigate = useNavigate();
+  const { linkState } = usePageNavigation();
   const rows = limit ? standings.slice(0, limit) : standings;
 
   return (
@@ -201,7 +204,15 @@ const StandingsTable = ({
             return (
               <Row
                 key={standing.id}
-                onClick={() => navigate(`/teams/${standing.teamId}`)}
+                role="link"
+                tabIndex={0}
+                onClick={() => navigate(`/teams/${standing.teamId}`, { state: linkState })}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    navigate(`/teams/${standing.teamId}`, { state: linkState });
+                  }
+                }}
               >
                 <RankCell $align="left" $qualifying={qualifying}>
                   {index + 1}

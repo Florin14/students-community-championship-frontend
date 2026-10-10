@@ -1,7 +1,20 @@
 import { attendanceEn } from "./attendance";
 
 const en = {
+  "nav.backToPage": "Back to {page}",
+  "nav.backToChampionship": "Back to the championship",
+  "nav.championship": "Championship",
+  "nav.matchDetails": "match details",
+  "nav.playerDetails": "player profile",
+  "nav.teamDetails": "team details",
+  "console.viewMatch": "Match details",
+  "nav.staffNavigation": "Staff pages",
+  "nav.publicNavigation": "Championship pages",
+  "console.reminderTime": "The clock is still running after {minutes} minutes of play. Check whether to pause it or confirm the result.",
   ...attendanceEn,
+  "playerPhoto.open": "Enlarge {name}'s photo",
+  "playerPhoto.title": "Player photo: {name}",
+  "playerPhoto.close": "Close",
   "calendar.title": "Competition calendar",
   "calendar.publicHint": "Proposed season calendar. Dates may change; each match's schedule is listed below.",
   "calendar.loadTemplate": "Load the 2026–2027 template",

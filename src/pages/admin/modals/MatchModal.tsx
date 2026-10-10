@@ -12,6 +12,7 @@ import {
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 import StyledSelect from "../../../components/reusable/StyledSelect";
+import TeamIdentity from "../../../components/reusable/TeamIdentity";
 import AudienceField from "../../../components/reusable/AudienceField";
 import { isValidAudience } from "../../../utils/audience";
 import StyledTextField from "../../../components/reusable/StyledTextField";
@@ -219,7 +220,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
                   .filter((team) => team.id !== awayTeamId)
                   .map((team) => (
                     <MenuItem key={team.id} value={team.id}>
-                      {team.name}
+                      <TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />
                     </MenuItem>
                   ))}
               </StyledSelect>
@@ -241,7 +242,7 @@ const MatchModal = ({ open, match, seasonId, onClose }: MatchModalProps) => {
                   .filter((team) => team.id !== homeTeamId)
                   .map((team) => (
                     <MenuItem key={team.id} value={team.id}>
-                      {team.name}
+                      <TeamIdentity teamId={team.id} name={team.name} logo={team.logo} color={team.color} />
                     </MenuItem>
                   ))}
               </StyledSelect>
